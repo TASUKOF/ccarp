@@ -556,4 +556,3 @@ Q.forEach(function(q){
 });
 
 window.G=G;window.O=O;window.Q=Q;
-window.G=G;window.O=O;window.Q=Q;
