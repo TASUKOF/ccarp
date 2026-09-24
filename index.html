@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1a18">
+<title>CCAR-P 弱点特化トレーナー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CCAR-P Trainer — Anthropic-like Exam UI
+   ============================================================ */
+:root{
+  --bg:#f7f6f3; --panel:#fff; --ink:#1f1e1c; --ink2:#55524d; --ink3:#8b8781;
+  --line:#e6e3dd; --line2:#d4d0c8;
+  --accent:#c96442; --accent-d:#a84f33; --accent-l:#fdf2ee;
+  --ok:#2f7d5d; --ok-bg:#eaf6f0; --ng:#b3352b; --ng-bg:#fdeeec;
+  --warn:#9a6b12; --warn-bg:#fdf5e3;
+  --flag:#b07d2a;
+  --r:10px; --r-l:14px;
+  --sh:0 1px 2px rgba(31,30,28,.05),0 2px 8px rgba(31,30,28,.04);
+  --sh-l:0 4px 24px rgba(31,30,28,.10);
+  --fs:15px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter','Noto Sans JP',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg); color:var(--ink); font-size:var(--fs); line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
+h1,h2,h3,h4{margin:0;line-height:1.4;font-weight:700;letter-spacing:-.01em}
+a{color:var(--accent-d)}
+.hide{display:none!important}
+
+/* ---------- Header ---------- */
+.hdr{
+  position:sticky;top:0;z-index:50;background:rgba(247,246,243,.88);
+  backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);
+}
+.hdr-in{max-width:1180px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;white-space:nowrap}
+.logo i{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:12px;font-style:normal;font-weight:700}
+.hdr-sp{flex:1}
+.hchip{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;
+  background:var(--panel);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink2);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.hchip.t{font-size:14px;font-weight:700;color:var(--ink)}
+.hchip.t.warn{color:var(--ng);border-color:#f0c7c2;background:var(--ng-bg)}
+.pbar{height:3px;background:var(--line);overflow:hidden}
+.pbar>div{height:100%;background:var(--accent);transition:width .3s ease}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 80px}
+.narrow{max-width:800px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-l);box-shadow:var(--sh)}
+.pad{padding:26px 30px}
+@media(max-width:640px){.pad{padding:20px 18px}.wrap{padding:16px 13px 70px}}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 20px;border-radius:var(--r);font-weight:600;font-size:14.5px;
+  background:var(--panel);border:1px solid var(--line2);color:var(--ink);
+  transition:.14s; white-space:nowrap;
+}
+.btn:hover{border-color:var(--ink3);background:#fbfaf8}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover{background:var(--accent-d);border-color:var(--accent-d)}
+.btn.lg{padding:14px 30px;font-size:16px;width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:7px 13px;font-size:13px;border-radius:8px}
+.btn.flag.on{background:#fdf6e8;border-color:#e5cf9a;color:var(--flag)}
+
+/* ---------- Start screen ---------- */
+.hero{text-align:center;padding:8px 0 26px}
+.hero h1{font-size:30px;margin-bottom:10px}
+.hero p{color:var(--ink2);margin:0;font-size:14.5px}
+@media(max-width:640px){.hero h1{font-size:23px}}
+.sec{margin-bottom:26px}
+.sec-t{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:11px}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media(max-width:640px){.opts{grid-template-columns:1fr}}
+.opt{
+  display:block;padding:15px 17px;border:1.5px solid var(--line);border-radius:var(--r);
+  background:var(--panel);cursor:pointer;transition:.14s;text-align:left;
+}
+.opt:hover{border-color:var(--ink3)}
+.opt.on{border-color:var(--accent);background:var(--accent-l)}
+.opt b{display:block;font-size:15px;margin-bottom:3px}
+.opt span{font-size:12.5px;color:var(--ink2);line-height:1.6;display:block}
+
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.pre{
+  padding:8px 15px;border-radius:99px;border:1.5px solid var(--line);
+  background:var(--panel);font-size:13.5px;font-weight:600;transition:.14s;
+}
+.pre:hover{border-color:var(--ink3)}
+.pre.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+.objs{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+@media(max-width:700px){.objs{grid-template-columns:1fr}}
+.ob{
+  display:flex;align-items:center;gap:10px;padding:10px 13px;border:1px solid var(--line);
+  border-radius:9px;background:var(--panel);cursor:pointer;transition:.12s;font-size:13.5px;
+}
+.ob:hover{background:#fbfaf8}
+.ob.on{border-color:var(--accent);background:var(--accent-l)}
+.ob-c{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--line2);display:grid;place-items:center;flex:none;font-size:10px;color:#fff;background:#fff}
+.ob.on .ob-c{background:var(--accent);border-color:var(--accent)}
+.ob-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ob-s{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;flex:none;font-variant-numeric:tabular-nums}
+.s0{background:var(--ng-bg);color:var(--ng)}
+.s1{background:var(--warn-bg);color:var(--warn)}
+.s2{background:var(--ok-bg);color:var(--ok)}
+.ob-q{font-size:11.5px;color:var(--ink3);flex:none;font-variant-numeric:tabular-nums}
+
+.slider{display:flex;align-items:center;gap:14px}
+.slider input{flex:1;accent-color:var(--accent);height:5px}
+.slider b{font-size:19px;min-width:68px;text-align:right;font-variant-numeric:tabular-nums}
+.note{font-size:12.5px;color:var(--ink3);margin-top:9px;line-height:1.7}
+
+/* ---------- Question ---------- */
+.qgrid{display:grid;grid-template-columns:1fr 226px;gap:20px;align-items:start}
+@media(max-width:940px){.qgrid{grid-template-columns:1fr}.side{order:-1}}
+.qhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.tag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;background:#f1efea;color:var(--ink2);letter-spacing:.03em}
+.tag.dom{background:#eceffa;color:#3f4f8f}
+.tag.multi{background:var(--warn-bg);color:var(--warn)}
+.qno{font-size:13px;font-weight:700;color:var(--ink3);font-variant-numeric:tabular-nums}
+
+.qtext{font-size:16.5px;line-height:1.85;font-weight:500;margin-bottom:6px}
+.qtext.en{font-size:15.5px;color:var(--ink2);font-weight:400;line-height:1.8;padding-top:13px;margin-top:13px;border-top:1px dashed var(--line2)}
+.multi-hint{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:var(--warn);background:var(--warn-bg);padding:5px 12px;border-radius:7px}
+
+.chs{display:flex;flex-direction:column;gap:9px;margin-top:22px}
+.ch{
+  display:flex;gap:13px;padding:14px 16px;border:1.5px solid var(--line);border-radius:var(--r);
+  background:var(--panel);cursor:pointer;transition:.13s;text-align:left;width:100%;align-items:flex-start;
+}
+.ch:hover{border-color:var(--ink3);background:#fbfaf8}
+.ch.on{border-color:var(--accent);background:var(--accent-l)}
+.ch-k{
+  width:25px;height:25px;border-radius:7px;border:1.5px solid var(--line2);flex:none;
+  display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--ink2);background:#fff;margin-top:1px;
+}
+.ch.on .ch-k{background:var(--accent);border-color:var(--accent);color:#fff}
+.ch-b{flex:1;min-width:0}
+.ch-ja{line-height:1.7}
+.ch-en{font-size:13px;color:var(--ink3);line-height:1.65;margin-top:5px;font-style:italic}
+.ch.ok{border-color:var(--ok);background:var(--ok-bg)}
+.ch.ok .ch-k{background:var(--ok);border-color:var(--ok);color:#fff}
+.ch.ng{border-color:var(--ng);background:var(--ng-bg)}
+.ch.ng .ch-k{background:var(--ng);border-color:var(--ng);color:#fff}
+.ch.dim{opacity:.55}
+.ch.locked{cursor:default}
+.ch.locked:hover{background:inherit}
+
+/* ---------- Feedback ---------- */
+.fb{margin-top:22px;border-radius:var(--r-l);border:1px solid var(--line);overflow:hidden;background:var(--panel)}
+.fb-h{padding:13px 20px;font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:9px}
+.fb-h.ok{background:var(--ok-bg);color:var(--ok)}
+.fb-h.ng{background:var(--ng-bg);color:var(--ng)}
+.fb-b{padding:20px 22px}
+.cue{
+  background:#faf9f6;border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:8px;padding:11px 15px;margin-bottom:18px;font-size:13px;color:var(--ink2);
+}
+.cue b{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px}
+.exp h4{font-size:13.5px;margin:20px 0 8px;color:var(--accent-d);letter-spacing:0}
+.exp h4:first-child{margin-top:0}
+.exp p{margin:0 0 11px;line-height:1.85}
+.exp b{font-weight:700}
+.exp ul{margin:0 0 11px;padding-left:20px}
+.exp li{margin-bottom:5px}
+.terms{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
+.term{
+  padding:5px 12px;border-radius:99px;border:1px solid var(--line2);background:#faf9f6;
+  font-size:12.5px;font-weight:600;color:var(--ink2);transition:.12s;
+}
+.term:hover{background:var(--accent-l);border-color:var(--accent);color:var(--accent-d)}
+
+/* ---------- Sidebar ---------- */
+.side{position:sticky;top:76px;display:flex;flex-direction:column;gap:13px}
+@media(max-width:940px){.side{position:static}}
+.spanel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-l);padding:15px;box-shadow:var(--sh)}
+.spanel h5{margin:0 0 11px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(33px,1fr));gap:6px}
+@media(max-width:940px){.nav{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))}}
+.nb{
+  aspect-ratio:1;border-radius:7px;border:1.5px solid var(--line);background:var(--panel);
+  font-size:12px;font-weight:700;color:var(--ink2);display:grid;place-items:center;
+  transition:.12s;position:relative;font-variant-numeric:tabular-nums;
+}
+.nb:hover{border-color:var(--ink3)}
+.nb.done{background:#eceae5;border-color:var(--line2);color:var(--ink)}
+.nb.cur{border-color:var(--accent);border-width:2px;background:var(--accent-l);color:var(--accent-d)}
+.nb.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.nb.ng{background:var(--ng-bg);border-color:var(--ng);color:var(--ng)}
+.nb.fl::after{content:"";position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--flag);border:1.5px solid #fff}
+.leg{display:flex;flex-wrap:wrap;gap:9px;margin-top:11px;font-size:11px;color:var(--ink3)}
+.leg i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px;border:1px solid var(--line2)}
+
+/* ---------- Footer bar ---------- */
+.foot{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);border-top:1px solid var(--line);
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom));
+}
+.foot-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.foot-sp{flex:1}
+@media(max-width:640px){.foot .lbl{display:none}}
+
+/* ---------- Result ---------- */
+.score{text-align:center;padding:34px 20px}
+.score .big{font-size:62px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.score .big.p{color:var(--ok)} .score .big.f{color:var(--ng)}
+.score .vd{font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:12px}
+.score .vd.p{color:var(--ok)} .score .vd.f{color:var(--ng)}
+.score .sub{color:var(--ink2);margin-top:9px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:22px 0}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.st{background:#faf9f6;border:1px solid var(--line);border-radius:var(--r);padding:14px;text-align:center}
+.st b{display:block;font-size:23px;font-variant-numeric:tabular-nums;line-height:1.2}
+.st span{font-size:11.5px;color:var(--ink3)}
+.bd{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.bd-r{display:flex;align-items:center;gap:12px;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13.5px}
+.bd-r:last-child{border-bottom:none}
+.bd-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bd-bar{width:110px;height:7px;border-radius:99px;background:var(--line);overflow:hidden;flex:none}
+@media(max-width:640px){.bd-bar{width:56px}}
+.bd-bar>div{height:100%;border-radius:99px}
+.bd-v{width:52px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;flex:none;font-size:13px}
+.delta{font-size:11.5px;font-weight:700;width:46px;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+.d-up{color:var(--ok)} .d-dn{color:var(--ng)} .d-eq{color:var(--ink3)}
+
+/* ---------- Review list ---------- */
+.rv{border:1px solid var(--line);border-radius:var(--r);padding:15px 17px;margin-bottom:11px;background:var(--panel)}
+.rv-h{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap}
+.rv-q{font-weight:500;line-height:1.7;margin-bottom:11px}
+.rv-a{font-size:13.5px;padding:7px 12px;border-radius:7px;margin-bottom:5px;line-height:1.6}
+.rv-a.y{background:var(--ok-bg);color:#1e5c42}
+.rv-a.n{background:var(--ng-bg);color:#8a281f}
+
+/* ---------- Modal ---------- */
+.mask{position:fixed;inset:0;background:rgba(31,30,28,.42);z-index:100;display:grid;place-items:center;padding:20px;backdrop-filter:blur(3px)}
+.modal{background:var(--panel);border-radius:var(--r-l);max-width:560px;width:100%;max-height:82vh;overflow:auto;box-shadow:var(--sh-l)}
+.modal-h{padding:19px 24px 0;display:flex;align-items:flex-start;gap:12px}
+.modal-h h3{flex:1;font-size:18px}
+.modal-b{padding:14px 24px 24px}
+.x{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--ink3);font-size:19px;flex:none}
+.x:hover{background:#f1efea}
+.gl-en{font-size:12.5px;color:var(--ink3);font-weight:600;margin-bottom:12px;font-style:italic}
+.gl-d{line-height:1.9}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <div class="logo"><i>C</i><span>CCAR-P Trainer</span></div>
+    <div class="hdr-sp"></div>
+    <div id="hInfo" style="display:flex;gap:8px;align-items:center"></div>
+  </div>
+  <div class="pbar"><div id="pbar" style="width:0%"></div></div>
+</div>
+
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   Objectives / Domains
+   ============================================================ */
+const OBJ = {
+  authz:     {d:"D3", ja:"認証・認可のギャップ特定",       en:"AuthN/AuthZ security gaps",            base:0},
+  observ:    {d:"D3", ja:"大規模observability戦略",       en:"Observability & monitoring at scale",  base:0},
+  reuse:     {d:"D2", ja:"prompt再利用 / caching",        en:"Prompt reuse strategies",              base:0},
+  bloat:     {d:"D3", ja:"capability bloat評価",          en:"Capability bloat",                     base:33},
+  latency:   {d:"D3", ja:"accuracy-latency トレードオフ", en:"Accuracy-latency trade-offs",          base:33},
+  modelsel:  {d:"D2", ja:"モデル選定のトレードオフ",       en:"Model selection trade-offs",           base:33},
+  protocol:  {d:"D3", ja:"接続プロトコル選択",             en:"Connection protocol selection",        base:50},
+  discovery: {d:"D6", ja:"構造化discovery・要件定義",     en:"Structured discovery",                 base:0},
+  lifecycle: {d:"D6", ja:"ライフサイクル / handoff",      en:"Lifecycle & handoff",                  base:0},
+  devflow:   {d:"D7", ja:"開発ワークフロー改善",           en:"Developer workflow improvement",       base:0},
+  debug:     {d:"D7", ja:"デバッグ・運用課題解決",         en:"Debugging & ops resolution",           base:50},
+  sysprompt: {d:"D2", ja:"system prompt / guardrail設計", en:"System prompts & guardrails",          base:50},
+  prompteng: {d:"D2", ja:"prompt技法 (few-shot/CoT)",     en:"Prompt engineering techniques",        base:50},
+  guardrail: {d:"D5", ja:"guardrail・安全統制の実装",      en:"Guardrails & safety controls",         base:50},
+  hitl:      {d:"D5", ja:"HITL戦略",                      en:"Human-in-the-loop strategies",         base:75},
+  e2e:       {d:"D1", ja:"end-to-endアーキ設計",           en:"End-to-end architecture",              base:67},
+  evalset:   {d:"D4", ja:"eval dataset / test framework", en:"Evaluation datasets & frameworks",     base:67}
+};
+const DOM = {
+  D1:"D1 Solution Design (17%)", D2:"D2 Models & Prompting (13%)",
+  D3:"D3 Integration (19%)", D4:"D4 Eval & Testing (16%)",
+  D5:"D5 Governance & Safety (14%)", D6:"D6 Stakeholder & Lifecycle (14%)",
+  D7:"D7 Dev Productivity (7%)"
+};
+const KEY = "ABCDEFG";
+const LS  = "ccarp_v1";
+
+/* ============================================================
+   State
+   ============================================================ */
+let S = {
+  scr:"start", mode:"practice", lang:"ja",
+  sel:new Set(Object.keys(OBJ)), count:20,
+  qs:[], i:0, ans:{}, chk:{}, flag:new Set(),
+  t0:0, limit:0, timer:null, wrongOnly:false
+};
+const store = {
+  get(){ try{return JSON.parse(localStorage.getItem(LS))||{wrong:[],hist:[]}}catch(e){return{wrong:[],hist:[]}} },
+  set(v){ try{localStorage.setItem(LS,JSON.stringify(v))}catch(e){} }
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]} return a; };
+const eq = (a,b) => a.length===b.length && a.every(v=>b.includes(v));
+const scls = v => v<=33?"s0":v<=70?"s1":"s2";
+
+/* ============================================================
+   Start screen
+   ============================================================ */
+function renderStart(){
+  $("hInfo").innerHTML="";
+  $("pbar").style.width="0%";
+  const bank = window.QUESTIONS||[];
+  const cnt = {}; bank.forEach(q=>cnt[q.obj]=(cnt[q.obj]||0)+1);
+  const w = store.get();
+  const keys = Object.keys(OBJ).sort((a,b)=>OBJ[a].base-OBJ[b].base || a.localeCompare(b));
+
+  $("app").innerHTML = `
+  <div class="wrap narrow">
+    <div class="hero">
+      <h1>CCAR-P 弱点特化トレーナー</h1>
+      <p>スコアレポート連動 · 全${bank.length}問 · 英日併記 · 用語解説付き</p>
+    </div>
+
+    <div class="card pad">
+      <div class="sec">
+        <div class="sec-t">Mode / 出題モード</div>
+        <div class="opts">
+          <button class="opt ${S.mode==='practice'?'on':''}" onclick="setMode('practice')">
+            <b>練習モード</b><span>1問ごとに即・正誤と詳細解説。用語をタップすると意味が出ます。学習用。</span></button>
+          <button class="opt ${S.mode==='exam'?'on':''}" onclick="setMode('exam')">
+            <b>試験モード</b><span>1問1.9分のタイマー付き。解説は最後にまとめて。本番の時間感覚の訓練。</span></button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">Presets / 弱点プリセット</div>
+        <div class="presets">
+          <button class="pre" onclick="preset(0)">0% だけ (最優先)</button>
+          <button class="pre" onclick="preset(33)">33%以下</button>
+          <button class="pre" onclick="preset(50)">50%以下</button>
+          <button class="pre" onclick="preset(100)">全範囲</button>
+          <button class="pre" onclick="preset('wrong')">誤答のみ (${w.wrong.length})</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">Objectives / 出題範囲 <span style="text-transform:none;letter-spacing:0;font-weight:500">— 数字は前回スコア</span></div>
+        <div class="objs">
+          ${keys.map(k=>`
+            <button class="ob ${S.sel.has(k)?'on':''}" onclick="tog('${k}')">
+              <span class="ob-c">✓</span>
+              <span class="ob-n" title="${esc(OBJ[k].ja)}">${esc(OBJ[k].ja)}</span>
+              <span class="ob-q">${cnt[k]||0}問</span>
+              <span class="ob-s ${scls(OBJ[k].base)}">${OBJ[k].base}%</span>
+            </button>`).join("")}
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-t">Length / 出題数</div>
+        <div class="slider">
+          <input type="range" id="cnt" min="5" max="60" step="5" value="${S.count}" oninput="setCount(this.value)">
+          <b id="cntv">${S.count}問</b>
+        </div>
+        <div class="note" id="avail"></div>
+      </div>
+
+      <button class="btn pri lg" onclick="start()">試験を開始する</button>
+    </div>
+
+    ${w.hist.length?`<div class="card pad" style="margin-top:16px">
+      <div class="sec-t">History / 直近の記録</div>
+      ${w.hist.slice(-5).reverse().map(h=>`<div style="display:flex;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px">
+        <span style="color:var(--ink3);flex:1">${h.date}</span>
+        <span style="color:var(--ink3)">${h.n}問</span>
+        <b style="color:${h.pct>=75?'var(--ok)':'var(--ng)'}">${h.pct}%</b></div>`).join("")}
+      <button class="btn sm" style="margin-top:14px" onclick="reset()">記録をリセット</button>
+    </div>`:""}
+  </div>`;
+  updAvail();
+}
+function setMode(m){S.mode=m;renderStart()}
+function tog(k){S.sel.has(k)?S.sel.delete(k):S.sel.add(k);S.wrongOnly=false;renderStart()}
+function setCount(v){S.count=+v;$("cntv").textContent=v+"問";updAvail()}
+function preset(v){
+  S.wrongOnly=false;
+  if(v==='wrong'){S.wrongOnly=true;S.sel=new Set(Object.keys(OBJ))}
+  else S.sel=new Set(Object.keys(OBJ).filter(k=>OBJ[k].base<=v));
+  renderStart();
+}
+function pool(){
+  const bank=window.QUESTIONS||[];
+  if(S.wrongOnly){const w=new Set(store.get().wrong);return bank.filter(q=>w.has(q.id))}
+  return bank.filter(q=>S.sel.has(q.obj));
+}
+function updAvail(){
+  const n=pool().length, el=$("avail"); if(!el)return;
+  const use=Math.min(S.count,n);
+  el.innerHTML = n===0
+    ? `<span style="color:var(--ng)">該当する問題がありません。範囲を広げてください。</span>`
+    : `該当 <b>${n}問</b> から <b>${use}問</b> を出題${S.mode==='exam'?` · 制限時間 <b>${Math.round(use*1.9)}分</b>`:""}`;
+}
+
+/* ============================================================
+   Start exam
+   ============================================================ */
+function start(){
+  const p=pool();
+  if(!p.length){alert("該当する問題がありません。範囲を広げてください。");return}
+  S.qs=shuffle(p).slice(0,Math.min(S.count,p.length));
+  S.i=0;S.ans={};S.chk={};S.flag=new Set();S.scr="q";
+  if(S.mode==="exam"){
+    S.limit=Math.round(S.qs.length*1.9*60); S.t0=Date.now();
+    clearInterval(S.timer); S.timer=setInterval(tick,1000);
+  }
+  window.scrollTo(0,0); renderQ();
+}
+function tick(){
+  const left=S.limit-((Date.now()-S.t0)/1000|0);
+  if(left<=0){clearInterval(S.timer);finish();return}
+  const el=$("timer"); if(!el)return;
+  el.textContent=`${String(left/60|0).padStart(2,"0")}:${String(left%60).padStart(2,"0")}`;
+  el.parentElement.classList.toggle("warn",left<300);
+}
+
+/* ============================================================
+   Question screen
+   ============================================================ */
+function renderQ(){
+  const q=S.qs[S.i], n=S.qs.length, done=Object.keys(S.ans).length;
+  const locked=S.mode==="practice"&&S.chk[q.id];
+  const sel=S.ans[q.id]||[];
+  const ok=locked?eq(sel,q.a):null;
+
+  $("pbar").style.width=((S.i+1)/n*100)+"%";
+  $("hInfo").innerHTML=`
+    ${S.mode==="exam"?`<span class="hchip t"><span id="timer">--:--</span></span>`:""}
+    <span class="hchip">${done}/${n} 回答</span>
+    <button class="hchip" onclick="quit()" style="cursor:pointer">中断</button>`;
+  if(S.mode==="exam")tick();
+
+  $("app").innerHTML=`
+  <div class="wrap"><div class="qgrid">
+    <div class="card pad">
+      <div class="qhead">
+        <span class="qno">Question ${S.i+1} / ${n}</span>
+        <span class="tag dom">${q.dom}</span>
+        <span class="tag">${esc(OBJ[q.obj].ja)}</span>
+        ${q.type==="multi"?`<span class="tag multi">複数選択</span>`:""}
+        <div style="flex:1"></div>
+        <button class="btn sm flag ${S.flag.has(q.id)?'on':''}" onclick="flagQ()">⚑ <span class="lbl">後で見直す</span></button>
+      </div>
+
+      <div class="qtext">${esc(q.q_ja)}</div>
+      <div class="qtext en">${esc(q.q_en)}</div>
+      ${q.type==="multi"?`<div class="multi-hint">▸ 正解は ${q.a.length} つです / Choose ${q.a.length}</div>`:""}
+
+      <div class="chs">
+        ${q.c_ja.map((c,idx)=>{
+          let cls="ch";
+          if(locked){
+            cls+=" locked";
+            if(q.a.includes(idx))cls+=" ok";
+            else if(sel.includes(idx))cls+=" ng";
+            else cls+=" dim";
+          } else if(sel.includes(idx)) cls+=" on";
+          return `<button class="${cls}" ${locked?"":`onclick="pick(${idx})"`}>
+            <span class="ch-k">${KEY[idx]}</span>
+            <span class="ch-b"><span class="ch-ja">${esc(c)}</span><span class="ch-en">${esc(q.c_en[idx])}</span></span>
+          </button>`;
+        }).join("")}
+      </div>
+
+      ${locked?`
+      <div class="fb">
+        <div class="fb-h ${ok?'ok':'ng'}">${ok?"✓ 正解":"✕ 不正解"} — 正答: ${q.a.map(i=>KEY[i]).join(", ")}</div>
+        <div class="fb-b">
+          <div class="cue"><b>English cue</b>${esc(q.cue)}</div>
+          <div class="exp">${q.exp}</div>
+          ${(q.terms||[]).length?`<div class="terms">${q.terms.map(t=>
+            `<button class="term" onclick="gl('${t}')">${esc((window.GLOSSARY&&GLOSSARY[t]&&GLOSSARY[t].ja)||t)}</button>`).join("")}</div>`:""}
+        </div>
+      </div>`:""}
+    </div>
+
+    <div class="side">
+      <div class="spanel">
+        <h5>Navigator</h5>
+        <div class="nav">
+          ${S.qs.map((x,idx)=>{
+            let c="nb";
+            if(idx===S.i)c+=" cur";
+            else if(S.mode==="practice"&&S.chk[x.id])c+=eq(S.ans[x.id]||[],x.a)?" ok":" ng";
+            else if(S.ans[x.id])c+=" done";
+            if(S.flag.has(x.id))c+=" fl";
+            return `<button class="${c}" onclick="go(${idx})">${idx+1}</button>`;
+          }).join("")}
+        </div>
+        <div class="leg">
+          <span><i style="background:var(--accent-l);border-color:var(--accent)"></i>現在</span>
+          <span><i style="background:#eceae5"></i>回答済</span>
+          <span><i style="background:var(--flag);border-radius:50%"></i>見直し</span>
+        </div>
+      </div>
+      <div class="spanel">
+        <h5>Info</h5>
+        <div style="font-size:12.5px;color:var(--ink2);line-height:1.9">
+          ${esc(DOM[q.dom])}<br>
+          <span style="color:var(--ink3)">前回スコア: <b class="${scls(OBJ[q.obj].base)}" style="padding:1px 7px;border-radius:99px">${OBJ[q.obj].base}%</b></span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="foot"><div class="foot-in">
+    <button class="btn" onclick="go(${S.i-1})" ${S.i===0?"disabled":""}>← <span class="lbl">前へ</span></button>
+    <div class="foot-sp"></div>
+    ${S.mode==="practice"&&!locked
+      ? `<button class="btn pri" onclick="check()" ${sel.length?"":"disabled"}>解答を確認</button>`
+      : (S.i<n-1 ? `<button class="btn pri" onclick="go(${S.i+1})"><span class="lbl">次へ</span> →</button>`
+                 : `<button class="btn pri" onclick="finish()">採点する</button>`)}
+    ${S.mode==="exam"?`<button class="btn" onclick="finish()">終了</button>`:""}
+  </div></div>`;
+}
+function pick(idx){
+  const q=S.qs[S.i]; let a=S.ans[q.id]||[];
+  if(q.type==="multi"){ a=a.includes(idx)?a.filter(x=>x!==idx):[...a,idx].sort((x,y)=>x-y); }
+  else a=[idx];
+  S.ans[q.id]=a; renderQ();
+  if(q.type==="single"&&S.mode==="exam"&&S.i<S.qs.length-1) setTimeout(()=>go(S.i+1),180);
+}
+function check(){
+  const q=S.qs[S.i]; S.chk[q.id]=true;
+  if(!eq(S.ans[q.id]||[],q.a)){
+    const d=store.get(); if(!d.wrong.includes(q.id)){d.wrong.push(q.id);store.set(d)}
+  } else {
+    const d=store.get(); d.wrong=d.wrong.filter(x=>x!==q.id); store.set(d);
+  }
+  renderQ();
+}
+function go(i){ if(i<0||i>=S.qs.length)return; S.i=i; window.scrollTo({top:0,behavior:"smooth"}); renderQ(); }
+function flagQ(){ const id=S.qs[S.i].id; S.flag.has(id)?S.flag.delete(id):S.flag.add(id); renderQ(); }
+function quit(){ if(confirm("中断してトップに戻りますか？\n現在の解答は保存されません。")){clearInterval(S.timer);S.scr="start";renderStart();window.scrollTo(0,0)} }
+
+/* ============================================================
+   Result
+   ============================================================ */
+function finish(){
+  clearInterval(S.timer);
+  const un=S.qs.filter(q=>!S.ans[q.id]).length;
+  if(un>0 && !confirm(`未回答が ${un}問 あります。採点しますか？`))return;
+  // record wrong
+  const d=store.get();
+  S.qs.forEach(q=>{
+    const c=eq(S.ans[q.id]||[],q.a);
+    if(c) d.wrong=d.wrong.filter(x=>x!==q.id);
+    else if(!d.wrong.includes(q.id)) d.wrong.push(q.id);
+  });
+  const nOK=S.qs.filter(q=>eq(S.ans[q.id]||[],q.a)).length;
+  const pct=Math.round(nOK/S.qs.length*100);
+  d.hist.push({date:new Date().toLocaleString("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}),n:S.qs.length,pct});
+  store.set(d);
+  S.scr="r"; window.scrollTo(0,0); renderResult(nOK,pct);
+}
+function renderResult(nOK,pct){
+  const n=S.qs.length, scaled=Math.round(pct*7.2+100).toString();
+  const pass=pct>=75;
+  const by={};
+  S.qs.forEach(q=>{ by[q.obj]=by[q.obj]||{o:0,n:0}; by[q.obj].n++; if(eq(S.ans[q.id]||[],q.a))by[q.obj].o++; });
+  const rows=Object.keys(by).sort((a,b)=>(by[a].o/by[a].n)-(by[b].o/by[b].n));
+  const mins=S.mode==="exam"?Math.round((Date.now()-S.t0)/60000):null;
+
+  $("hInfo").innerHTML=`<button class="hchip" onclick="home()" style="cursor:pointer">トップへ</button>`;
+  $("pbar").style.width="100%";
+
+  $("app").innerHTML=`
+  <div class="wrap narrow">
+    <div class="card">
+      <div class="score">
+        <div class="big ${pass?'p':'f'}">${scaled}</div>
+        <div class="vd ${pass?'p':'f'}">${pass?"PASS 相当":"FAIL 相当"}</div>
+        <div class="sub">${nOK} / ${n} 問正解 （${pct}%）　※本番の合格基準は 720 / 900</div>
+      </div>
+      <div class="pad" style="padding-top:0">
+        <div class="stats">
+          <div class="st"><b style="color:var(--ok)">${nOK}</b><span>正解</span></div>
+          <div class="st"><b style="color:var(--ng)">${n-nOK}</b><span>不正解</span></div>
+          <div class="st"><b>${pct}%</b><span>正答率</span></div>
+          <div class="st"><b>${mins!==null?mins+"分":"—"}</b><span>所要時間</span></div>
+        </div>
+
+        <div class="sec-t" style="margin-top:26px">Objective 別スコア <span style="text-transform:none;letter-spacing:0;font-weight:500">— 右端は前回比</span></div>
+        <div class="bd">
+          ${rows.map(k=>{
+            const r=by[k], p=Math.round(r.o/r.n*100), dv=p-OBJ[k].base;
+            const col=p<=33?"var(--ng)":p<=70?"var(--warn)":"var(--ok)";
+            const dc=dv>0?"d-up":dv<0?"d-dn":"d-eq";
+            return `<div class="bd-r">
+              <span class="tag dom">${OBJ[k].d}</span>
+              <span class="bd-n" title="${esc(OBJ[k].ja)}">${esc(OBJ[k].ja)}</span>
+              <span class="bd-bar"><div style="width:${p}%;background:${col}"></div></span>
+              <span class="bd-v" style="color:${col}">${p}%</span>
+              <span class="delta ${dc}">${dv>0?"▲+":dv<0?"▼":"±"}${dv===0?0:Math.abs(dv)}</span>
+            </div>`;
+          }).join("")}
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
+          <button class="btn pri" style="flex:1;min-width:150px" onclick="showReview()">誤答を復習する (${n-nOK})</button>
+          <button class="btn" style="flex:1;min-width:150px" onclick="home()">トップへ戻る</button>
+        </div>
+      </div>
+    </div>
+    <div id="rvBox" style="margin-top:20px"></div>
+  </div>`;
+}
+function showReview(){
+  const bad=S.qs.filter(q=>!eq(S.ans[q.id]||[],q.a));
+  if(!bad.length){$("rvBox").innerHTML=`<div class="card pad" style="text-align:center;color:var(--ok);font-weight:600">全問正解です 🎉</div>`;return}
+  $("rvBox").innerHTML=`<div class="card pad">
+    <div class="sec-t">Review / 誤答の復習</div>
+    ${bad.map(q=>{
+      const sel=S.ans[q.id]||[];
+      return `<div class="rv">
+        <div class="rv-h"><span class="tag dom">${q.dom}</span><span class="tag">${esc(OBJ[q.obj].ja)}</span></div>
+        <div class="rv-q">${esc(q.q_ja)}</div>
+        <div class="rv-a n">あなたの解答: ${sel.length?sel.map(i=>KEY[i]+". "+esc(q.c_ja[i])).join(" / "):"未回答"}</div>
+        <div class="rv-a y">正解: ${q.a.map(i=>KEY[i]+". "+esc(q.c_ja[i])).join(" / ")}</div>
+        <div class="cue" style="margin-top:12px"><b>English cue</b>${esc(q.cue)}</div>
+        <div class="exp" style="font-size:14px">${q.exp}</div>
+        ${(q.terms||[]).length?`<div class="terms">${q.terms.map(t=>
+          `<button class="term" onclick="gl('${t}')">${esc((window.GLOSSARY&&GLOSSARY[t]&&GLOSSARY[t].ja)||t)}</button>`).join("")}</div>`:""}
+      </div>`;
+    }).join("")}
+  </div>`;
+  $("rvBox").scrollIntoView({behavior:"smooth"});
+}
+function home(){ S.scr="start"; window.scrollTo(0,0); renderStart(); }
+function reset(){ if(confirm("学習記録（誤答リスト・履歴）を全て削除しますか？")){localStorage.removeItem(LS);renderStart()} }
+
+/* ============================================================
+   Glossary modal
+   ============================================================ */
+function gl(k){
+  const g=(window.GLOSSARY||{})[k];
+  if(!g){alert("用語データが見つかりません: "+k);return}
+  const d=document.createElement("div");
+  d.className="mask"; d.onclick=e=>{if(e.target===d)d.remove()};
+  d.innerHTML=`<div class="modal">
+    <div class="modal-h"><h3>${esc(g.ja)}</h3><button class="x" onclick="this.closest('.mask').remove()">×</button></div>
+    <div class="modal-b"><div class="gl-en">${esc(g.en)}</div><div class="gl-d">${g.d}</div></div>
+  </div>`;
+  document.body.appendChild(d);
+}
+
+/* ============================================================
+   Keyboard shortcuts
+   ============================================================ */
+document.addEventListener("keydown",e=>{
+  if(S.scr!=="q"||e.metaKey||e.ctrlKey)return;
+  const q=S.qs[S.i]; if(!q)return;
+  const k=e.key.toUpperCase(), idx=KEY.indexOf(k);
+  if(idx>=0&&idx<q.c_ja.length&&!(S.mode==="practice"&&S.chk[q.id])){e.preventDefault();pick(idx)}
+  else if(e.key==="ArrowRight"){e.preventDefault();go(S.i+1)}
+  else if(e.key==="ArrowLeft"){e.preventDefault();go(S.i-1)}
+  else if(e.key==="Enter"&&S.mode==="practice"&&!S.chk[q.id]&&(S.ans[q.id]||[]).length){e.preventDefault();check()}
+});
+
+/* ============================================================
+   Boot
+   ============================================================ */
+window.addEventListener("DOMContentLoaded",()=>{
+  if(!window.QUESTIONS||!window.QUESTIONS.length){
+    $("app").innerHTML=`<div class="wrap narrow"><div class="card pad" style="text-align:center">
+      <h2 style="color:var(--ng);margin-bottom:12px">問題データが読み込めません</h2>
+      <p style="color:var(--ink2);line-height:1.9">
+        <code>docs/data/questions.js</code> が作成されていないか、構文エラーがあります。<br>
+        ファイルのパスと中身を確認してください。<br><br>
+        <b>F12キー</b> → <b>Console</b> タブに詳細なエラーが表示されます。
+      </p></div></div>`;
+    return;
+  }
+  renderStart();
+});
+</script>
+<script src="data/questions.js"></script>
+<script>
+  // questions.js が後から読まれた場合の再描画
+  if(window.QUESTIONS && window.QUESTIONS.length && document.getElementById("app").innerHTML.trim()===""){ renderStart(); }
+</script>
+</body>
+</html>
