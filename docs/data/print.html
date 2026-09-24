@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>CCAR-P 速習</title>
+<style>
+@page { size: A4; margin: 10mm 9mm; }
+body { font-family: -apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+       font-size: 8pt; line-height: 1.4; color:#111; margin:0; }
+.q { page-break-inside: avoid; margin-bottom: 4mm; padding: 2.5mm 3mm;
+     border: 1px solid #ccc; border-left: 3px solid #333; }
+.hd { font-size: 7pt; color:#777; }
+.qe { font-weight:700; margin: 1px 0; }
+.qj { font-size: 7.5pt; color:#555; margin-bottom: 2px; }
+.ok { background:#e8f0e8; padding:2px 4px; margin:2px 0; }
+.ok b { color:#060; }
+.ng { font-size:7.5pt; color:#444; }
+.ng span { color:#a00; font-weight:700; }
+.cue { font-size:7pt; color:#666; font-style:italic; margin-top:2px; }
+.key { font-size:7.5pt; background:#fff8dc; padding:2px 4px; margin-top:2px; }
+h1 { font-size:13pt; margin:0 0 4mm; border-bottom:2px solid #333; }
+@media print { .noprint{display:none} }
+</style>
+</head>
+<body>
+<div class="noprint" style="background:#ffe;padding:8px;margin-bottom:8px;font-size:11pt">
+<b>Ctrl+P / ⌘P → 「PDFに保存」／ 背景グラフィックをONに</b>
+</div>
+<h1>CCAR-P 速習シート（全51問）</h1>
+<div id="out"></div>
+<script src="questions.js"></script>
+<script>
+var L=["A","B","C","D"],h="";
+function strip(s){
+  return s.replace(/<h4>/g,"／").replace(/<\/h4>/g,"：")
+          .replace(/<br\s*\/?>/g," ").replace(/<\/?(ul|li|b)>/g,"")
+          .replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim();
+}
+Q.forEach(function(q,i){
+  var A=q.a, ans=A.map(function(x){return L[x]}).join("+");
+  h+='<div class="q"><div class="hd">'+q.id+' · '+q.d+' · '+(O[q.o]?O[q.o].ja:'')
+    +(q.t==="m"?' · 複数':'')+'</div>';
+  h+='<div class="qe">'+q.qe+'</div><div class="qj">'+q.qj+'</div>';
+  A.forEach(function(x){
+    h+='<div class="ok"><b>✓'+L[x]+'</b> '+q.ce[x]+'<br><span style="color:#555">'
+      +q.cj[x]+'</span></div>';
+  });
+  var ng=[];
+  q.cj.forEach(function(c,j){ if(A.indexOf(j)<0) ng.push('<span>'+L[j]+'</span> '+c); });
+  h+='<div class="ng">'+ng.join(' ／ ')+'</div>';
+  h+='<div class="cue">cue: '+q.cue+'</div>';
+  h+='<div class="key">'+strip(q.e)+'</div></div>';
+});
+document.getElementById("out").innerHTML=h;
+</script>
+</body>
+</html>
