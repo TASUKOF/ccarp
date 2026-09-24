@@ -370,14 +370,6 @@ qe:"The team agreed to run a formatter and linter after code generation, but it 
 cj:["ファイル編集後に自動実行されるhookとして登録し、人やモデルの記憶に依存させない","CLAUDE.mdに「編集後は必ずlintを実行すること」と強調して記載する","CIで落ちた人に個別に注意を促す","lintのルールを緩めて、落ちにくくする"],
 ce:["Register it as a hook that runs automatically after file edits, removing reliance on human or model memory","Write in CLAUDE.md, in bold, that lint must always be run after editing","Individually remind people when CI fails","Relax the lint rules so CI fails less often"],
 a:[0],cue:"always happens / hook / do not rely on the model remembering",
-e:"<h4>原則</h4><b>「必ず起きてほしいこと」は、モデルにも人間にも覚えさせない。</b>仕組みで強制します。hookは特定タイミング（編集後・コミット前など）で<b>決定論的に</b>実行されるので、忘れようがありません。<h4>他が誤りの理由</h4><b>B</b>：<b>最も間違いやすい選択肢。</b>CLAUDE.mdは「文脈の共有」であって「実行の保証」ではありません。強調しても確率的にしか守られない——Q23の「promptでは保証にならない」と同じ構造です。<br><b>C</b>：人力の注意喚起はスケールせず再発します。<br><b>D</b>：品質基準を下げて症状を消すだけ。原因は未解決。<h4>覚え方</h4><b>CLAUDE.md＝知らせる／hook＝必ずやらせる。</b>この対
-
-{id:"Q32",o:"devflow",d:"D7",t:"s",
-qj:"コード生成後にフォーマッタとlintを走らせることをチームで決めたが、忘れられることが多くCIで落ちる。最も確実な仕組みは。",
-qe:"The team agreed to run a formatter and linter after code generation, but it is often forgotten and CI fails. What is the MOST reliable mechanism?",
-cj:["ファイル編集後に自動実行されるhookとして登録し、人やモデルの記憶に依存させない","CLAUDE.mdに「編集後は必ずlintを実行すること」と強調して記載する","CIで落ちた人に個別に注意を促す","lintのルールを緩めて、落ちにくくする"],
-ce:["Register it as a hook that runs automatically after file edits, removing reliance on human or model memory","Write in CLAUDE.md, in bold, that lint must always be run after editing","Individually remind people when CI fails","Relax the lint rules so CI fails less often"],
-a:[0],cue:"always happens / hook / do not rely on the model remembering",
 e:"<h4>原則</h4><b>「必ず起きてほしいこと」は、モデルにも人間にも覚えさせない。</b>仕組みで強制します。hookは特定タイミング（編集後・コミット前など）で<b>決定論的に</b>実行されるので、忘れようがありません。<h4>他が誤りの理由</h4><b>B</b>：<b>最も間違いやすい選択肢。</b>CLAUDE.mdは「文脈の共有」であって「実行の保証」ではありません。強調しても確率的にしか守られない——Q23の「promptでは保証にならない」と同じ構造です。<br><b>C</b>：人力の注意喚起はスケールせず再発します。<br><b>D</b>：品質基準を下げて症状を消すだけ。原因は未解決。<h4>覚え方</h4><b>CLAUDE.md＝知らせる／hook＝必ずやらせる。</b>この対比が出題されます。",
 tm:["hook","claude-md","deterministic","guardrail"]},
 
