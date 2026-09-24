@@ -1,6 +1,5 @@
 /* ============================================================
    CCAR-P Trainer — Question Bank  v-final (51問)
-   スコアレポート75%以下の16 Objectiveのみで構成
    ============================================================ */
 
 /* ===== 用語辞典 ===== */
@@ -61,9 +60,13 @@ var G={
 "structured-outputs":{en:"Structured outputs / JSON Schema",ja:"構造化出力",d:"スキーマで出力形式を強制する機能。<b>形は保証するが、正しさは保証しない。</b>値の妥当性は別途コードで検証。"},
 "few-shot":{en:"Few-shot / chain-of-thought",ja:"few-shot・CoT",d:"few-shotは<b>判断基準の提示</b>に効く（知識供給はretrievalの仕事）。CoTは多段推論が要る時だけ——定型抽出に常用するとコストが増えるだけ。"},
 "tco":{en:"TCO",ja:"総保有コスト",d:"token単価だけでなく再試行・人手レビュー・保守・障害対応まで含めた総額。<b>安いモデルにして人手レビューが増えれば逆に高くつく。</b>"},
-"feedback-loop":{en:"Feedback loop / drift",ja:"フィードバックループ",d:"人の修正・却下を収集しeval setと監視に還流する経路。<b>end-to-end設計にはこれが含まれる。</b>無いと静かに劣化する。"}};
+"feedback-loop":{en:"Feedback loop / drift",ja:"フィードバックループ",d:"人の修正・却下を収集しeval setと監視に還流する経路。<b>end-to-end設計にはこれが含まれる。</b>無いと静かに劣化する。"},
+"sysprompt":{en:"System prompt",ja:"システムプロンプト",d:"役割・制約・出力方針を与える土台。<b>ベースラインは作れるが保証は作れない。</b>硬い要件はコード側で強制する。"},
+"evalset":{en:"Eval set",ja:"評価セット",d:"品質を数値で測るためのテストデータ集合。<b>代表性・境界条件・過去障害</b>の3点が揃って初めて測定器になる。"},
+"e2e":{en:"End-to-end architecture",ja:"エンドツーエンド設計",d:"入力〜処理〜検証〜人間の介在〜フィードバックまでを一続きで設計すること。<b>モデル選定は一部分にすぎない。</b>"},
+"lifecycle":{en:"Lifecycle / handoff",ja:"ライフサイクル・引き継ぎ",d:"構築後の運用・劣化対応・引き継ぎまで含めた全期間。<b>ADR・runbook・named ownerが3点セット。</b>"}};
 
-/* ===== Objective（bは前回スコア） ===== */
+/* ===== Objective ===== */
 var O={
 authz:{d:"D3",ja:"認証・認可のギャップ特定",b:0},
 observ:{d:"D3",ja:"大規模observability戦略",b:0},
