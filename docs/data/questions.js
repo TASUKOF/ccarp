@@ -1,5 +1,6 @@
 /* ============================================================
-   CCAR-P Trainer — Question Bank
+   CCAR-P Trainer — Question Bank  v-final (51問)
+   スコアレポート75%以下の16 Objectiveのみで構成
    ============================================================ */
 
 /* ===== 用語辞典 ===== */
@@ -62,7 +63,7 @@ var G={
 "tco":{en:"TCO",ja:"総保有コスト",d:"token単価だけでなく再試行・人手レビュー・保守・障害対応まで含めた総額。<b>安いモデルにして人手レビューが増えれば逆に高くつく。</b>"},
 "feedback-loop":{en:"Feedback loop / drift",ja:"フィードバックループ",d:"人の修正・却下を収集しeval setと監視に還流する経路。<b>end-to-end設計にはこれが含まれる。</b>無いと静かに劣化する。"}};
 
-/* ===== Objective（数字は前回スコア） ===== */
+/* ===== Objective（bは前回スコア） ===== */
 var O={
 authz:{d:"D3",ja:"認証・認可のギャップ特定",b:0},
 observ:{d:"D3",ja:"大規模observability戦略",b:0},
@@ -81,7 +82,7 @@ e2e:{d:"D1",ja:"end-to-endアーキ設計",b:67},
 evalset:{d:"D4",ja:"eval dataset / framework",b:67},
 hitl:{d:"D5",ja:"HITL戦略",b:75}};
 
-/* ===== 問題 ===== */
+/* ===== 問題（全51問） ===== */
 var Q=[
 
 {id:"Q01",o:"authz",d:"D3",t:"s",
@@ -244,11 +245,7 @@ cj:["独立したtool呼び出しを並列化し、使用頻度の低い照会�
 ce:["Parallelize independent tool calls and make the rarely-needed lookup conditional or asynchronous","Switch to a smaller, faster model","Halve max_tokens to shorten outputs","Relax the p95 SLA to 3.5 seconds"],
 a:[0],cue:"p95 / sequential / in parallel / accuracy-latency trade-off",
 e:"<h4>なぜAか</h4><b>精度を落とさずにlatencyを削れる余地は、まずモデルではなくオーケストレーションにあります。</b>直列→並列、不要な照会の条件化・非同期化は<b>精度を一切犠牲にしません</b>。しかもこの設問では85%のケースで1系統まるごと省けます。<h4>他が誤りの理由</h4><b>B</b>：いきなり小型化は<b>精度SLAを壊すリスク</b>があり、検証手順も示されていません。<br><b>C</b>：出力の切り詰めは品質低下。<br><b>D</b>：<b>SLA緩和は最後の手段。</b>技術的余地を使い切る前に事業要件を下げるのはarchitectとして不適切です。",
-tm:["p95","sla","non-inferiority","tco"]}   
-];
-
-/* ===== 追加分 Q19-Q30 ===== */
-Q.push(
+tm:["p95","sla","non-inferiority","tco"]},
 
 {id:"Q19",o:"e2e",d:"D1",t:"s",
 qj:"保険金請求の自動査定システムを設計する。月20万件、うち約8%は不正の疑いで人間の調査官に回す必要がある。end-to-endアーキテクチャとして最も適切なのは。",
@@ -356,7 +353,205 @@ cj:["アーキテクチャ決定記録（なぜこの設計にし、どの案を
 ce:["Architecture decision records (why this design, which alternatives were rejected and why) and known constraints and prohibited changes","An incident runbook (symptom-based procedures, rollback steps, escalation path) plus monitoring items, thresholds, and a named owner","A list of every branch and commit created during development","Contact details for all team members and every past meeting minute"],
 a:[0,1],cue:"handoff / decision records / runbook / named owner / rollback",
 e:"<h4>handoffの2本柱</h4><b>A＝「なぜ」の継承。</b>ADRが無いと、後任は<b>過去に検討して却下した案を再発明する</b>か、<b>踏んではいけない地雷を踏みます</b>。「なぜそうしたか」は、コードを読んでも分かりません。<br><b>B＝「どう動かすか」の継承。</b>runbook・監視・<b>named owner</b>——特に責任者の名前が無いシステムは、障害時に誰も動きません。<b>監視は仕組みだけでは動かない</b>のです。<h4>なぜC・Dが誤りか</h4>どちらも<b>情報であって知識ではありません</b>。コミット履歴や議事録は「読めば分かるかもしれない生データ」であり、運用者が必要とするのは<b>整理された判断の根拠と手順</b>です。<b>量ではなく、行動可能性</b>が基準。",
-tm:["adr","runbook","named-owner","lifecycle","production-readiness","observability"]}
+tm:["adr","runbook","named-owner","lifecycle","production-readiness","observability"]},
 
-);
+{id:"Q31",o:"devflow",d:"D7",t:"s",
+qj:"チーム全員がClaude Codeを使っているが、毎回「テストはpytestで書く」「ログにPIIを出さない」「型ヒントを必ず付ける」と各自が指示を打ち直している。最も適切な改善は。",
+qe:"Everyone on the team uses Claude Code, but each person retypes the same instructions every session: use pytest, never log PII, always add type hints. What is the BEST improvement?",
+cj:["プロジェクト規約をCLAUDE.mdとしてリポジトリにコミットし、チーム全員が同じ前提を自動で共有する","規約をまとめたテキストをSlackにピン留めし、各自でコピペしてもらう","規約を守っているかをコードレビューで毎回人間が指摘する","規約を守らせるため、より高性能なモデルに変更する"],
+ce:["Commit the project conventions as CLAUDE.md in the repository so the whole team automatically shares the same context","Pin a text file of conventions in Slack and have each person paste it manually","Have humans point out convention violations in every code review","Switch to a more capable model so conventions are followed"],
+a:[0],cue:"repeated instructions / shared settings / commit to repo / team standard",
+e:"<h4>なぜAか</h4>「<b>毎回同じことを打ち直している</b>」は常設化のシグナルです。CLAUDE.mdをリポジトリにコミットすれば、<b>チーム標準として自動的に共有され、更新も1箇所で済みます</b>（Q11のsingle source of truthと同じ論法）。<h4>使い分け</h4><ul><li><b>リポジトリにコミット</b>＝チーム全体の規約（言語・テスト方針・禁止事項）</li><li><b>ローカル設定</b>＝個人の好み（出力の口調など）</li></ul><h4>他が誤りの理由</h4><b>B</b>：コピペ運用は<b>必ず追随しません</b>——今起きている問題そのもの。<br><b>C</b>：レビューは<b>発見的統制</b>。毎回指摘するのは人的コストの垂れ流しで、しかも見落とします。<br><b>D</b>：<b>情報を渡していない問題を、モデル性能で解こうとする誤答</b>（Q01と同型）。",
+tm:["claude-md","single-source","modular-prompt","agent-skills"]},
+
+{id:"Q32",o:"devflow",d:"D7",t:"s",
+qj:"コード生成後にフォーマッタとlintを走らせることをチームで決めたが、忘れられることが多くCIで落ちる。最も確実な仕組みは。",
+qe:"The team agreed to run a formatter and linter after code generation, but it is often forgotten and CI fails. What is the MOST reliable mechanism?",
+cj:["ファイル編集後に自動実行されるhookとして登録し、人やモデルの記憶に依存させない","CLAUDE.mdに「編集後は必ずlintを実行すること」と強調して記載する","CIで落ちた人に個別に注意を促す","lintのルールを緩めて、落ちにくくする"],
+ce:["Register it as a hook that runs automatically after file edits, removing reliance on human or model memory","Write in CLAUDE.md, in bold, that lint must always be run after editing","Individually remind people when CI fails","Relax the lint rules so CI fails less often"],
+a:[0],cue:"always happens / hook / do not rely on the model remembering",
+e:"<h4>原則</h4><b>「必ず起きてほしいこと」は、モデルにも人間にも覚えさせない。</b>仕組みで強制します。hookは特定タイミング（編集後・コミット前など）で<b>決定論的に</b>実行されるので、忘れようがありません。<h4>他が誤りの理由</h4><b>B</b>：<b>最も間違いやすい選択肢。</b>CLAUDE.mdは「文脈の共有」であって「実行の保証」ではありません。強調しても確率的にしか守られない——Q23の「promptでは保証にならない」と同じ構造です。<br><b>C</b>：人力の注意喚起はスケールせず再発します。<br><b>D</b>：品質基準を下げて症状を消すだけ。原因は未解決。<h4>覚え方</h4><b>CLAUDE.md＝知らせる／hook＝必ずやらせる。</b>この対
+
+{id:"Q32",o:"devflow",d:"D7",t:"s",
+qj:"コード生成後にフォーマッタとlintを走らせることをチームで決めたが、忘れられることが多くCIで落ちる。最も確実な仕組みは。",
+qe:"The team agreed to run a formatter and linter after code generation, but it is often forgotten and CI fails. What is the MOST reliable mechanism?",
+cj:["ファイル編集後に自動実行されるhookとして登録し、人やモデルの記憶に依存させない","CLAUDE.mdに「編集後は必ずlintを実行すること」と強調して記載する","CIで落ちた人に個別に注意を促す","lintのルールを緩めて、落ちにくくする"],
+ce:["Register it as a hook that runs automatically after file edits, removing reliance on human or model memory","Write in CLAUDE.md, in bold, that lint must always be run after editing","Individually remind people when CI fails","Relax the lint rules so CI fails less often"],
+a:[0],cue:"always happens / hook / do not rely on the model remembering",
+e:"<h4>原則</h4><b>「必ず起きてほしいこと」は、モデルにも人間にも覚えさせない。</b>仕組みで強制します。hookは特定タイミング（編集後・コミット前など）で<b>決定論的に</b>実行されるので、忘れようがありません。<h4>他が誤りの理由</h4><b>B</b>：<b>最も間違いやすい選択肢。</b>CLAUDE.mdは「文脈の共有」であって「実行の保証」ではありません。強調しても確率的にしか守られない——Q23の「promptでは保証にならない」と同じ構造です。<br><b>C</b>：人力の注意喚起はスケールせず再発します。<br><b>D</b>：品質基準を下げて症状を消すだけ。原因は未解決。<h4>覚え方</h4><b>CLAUDE.md＝知らせる／hook＝必ずやらせる。</b>この対比が出題されます。",
+tm:["hook","claude-md","deterministic","guardrail"]},
+
+{id:"Q33",o:"devflow",d:"D7",t:"m",
+qj:"開発生産性を高めるための施策として、適切なものを2つ選べ。",
+qe:"Select the TWO practices that genuinely improve development productivity.",
+cj:["繰り返す定型作業（調査→修正→テスト→PR作成）を手順とスクリプトごとSkillとして定義し、再利用可能にする","大規模な変更は1回の指示で全部やらせ、途中の確認は省いて時間を短縮する","タスクを分割し、独立した調査は並行して進め、各段階の出力を検証可能な単位で受け取る","生成されたコードはレビューせず、テストが通れば即マージする"],
+ce:["Define recurring routines (investigate, fix, test, open PR) as a Skill bundling the procedure and scripts so it is reusable","Ask for large changes in a single instruction and skip intermediate checks to save time","Break tasks down, run independent investigations in parallel, and receive each stage's output in verifiable units","Skip review of generated code and merge as soon as tests pass"],
+a:[0,2],cue:"repeatable workflow / verifiable units / parallelize independent work",
+e:"<h4>生産性の本質</h4><b>「速く書く」ことではなく「手戻りを減らす」ことです。</b><br><b>A＝反復の資産化。</b>毎回同じ手順を口頭で伝えるのをやめ、Skillとして固める。Q31・Q11と同じ「一元定義して再利用」の思想。<br><b>C＝検証可能な粒度。</b>独立作業は並列化し（Q18と同じ発想）、各段階を<b>検証できる単位</b>で受け取る。これが最も手戻りを減らします。<h4>なぜBが誤りか</h4>一括指示は<b>失敗したときの切り分けが不可能</b>になります。どこで間違えたか分からず、結局全部やり直し——<b>見かけの速さが最大の遅延要因</b>です。<h4>なぜDが誤りか</h4><b>テストが通ること ≠ 正しいこと。</b>テストは書かれた範囲しか検証しません。生成コードのレビュー省略は典型的なアンチパターンです。",
+tm:["agent-skills","single-source","hook","regression-test","deterministic"]},
+
+{id:"Q34",o:"debug",d:"D7",t:"s",
+qj:"RAGベースのサポートBotが、存在しない返品ポリシーを自信満々に回答した。ナレッジベースには正しいポリシー文書が存在している。最初に確認すべきことは。",
+qe:"A RAG-based support bot confidently described a return policy that does not exist, even though the correct policy document is in the knowledge base. What should you check FIRST?",
+cj:["そのクエリで実際に何が検索され、正しい文書が上位に入っていたか（retrieval結果）を確認する","system promptに「事実でないことを答えるな」と追記する","より高性能なモデルに変更する","temperatureを0に下げる"],
+ce:["Inspect what was actually retrieved for that query and whether the correct document ranked highly","Add to the system prompt: do not state things that are not factual","Switch to a more capable model","Lower temperature to 0"],
+a:[0],cue:"confidently wrong / check retrieval first / what was actually in context",
+e:"<h4>鉄則</h4><b>RAGで自信満々の誤答が出たら、まずretrievalを疑う。</b>モデルは<b>渡されたcontextの中でしか答えられません</b>。正しい文書が渡っていなければ、どんなに優秀なモデルでも埋めるしかない——これはモデルの欠陥ではなく<b>検索の失敗</b>です。<h4>診断の順序</h4>① <b>retrievalに正解文書が入ったか</b>（recall）→ ② 入ったが順位が低い（precision／rerank）→ ③ chunk分割で情報が断裂 → ④ 引用強制の有無 → ⑤ <b>最後にモデル</b><h4>他が誤りの理由</h4><b>B</b>：contextに無い情報は、指示しても出てきません。<br><b>C</b>：<b>層の取り違え。</b>入力が間違っているのに処理装置を替えても無意味（Q07と同型）。<br><b>D</b>：ハルシネーションの原因はtemperatureではありません。",
+tm:["rag","stale-chunk","observability","trace","hybrid-search"]},
+
+{id:"Q35",o:"debug",d:"D7",t:"s",
+qj:"社内規程を更新した直後から、Botが古い規程の内容を回答するようになった。最も可能性の高い原因は。",
+qe:"Right after internal policies were updated, the bot started answering with the old policy content. What is the MOST likely cause?",
+cj:["再インデックスが完了しておらず、旧版のchunkがベクトルDBに残っている","モデルが学習データから古い情報を思い出している","temperatureが高すぎて出力が不安定になっている","context windowが不足して新しい規程が切り捨てられている"],
+ce:["Re-indexing did not complete, so stale chunks from the old version remain in the vector store","The model is recalling outdated information from its training data","Temperature is too high, making outputs unstable","The context window is too small and the new policy was truncated"],
+a:[0],cue:"right after the update / stale chunks / re-index",
+e:"<h4>時間的な手がかりが決定的</h4><b>「更新直後から」</b>という記述は、原因がデータ層にあることをほぼ確定させます。典型的なのは<b>stale chunk</b>——再インデックスが失敗・未完了で旧版の断片が残り、検索で拾われ続けている状態です。<h4>確認手順</h4>① retrievalで返ったdocument IDと<b>バージョン・更新日時</b>を確認 → ② 旧版chunkが残っていれば削除して再インデックス → ③ 再発防止として<b>文書更新をトリガーに再インデックスを自動化</b>（Q32のhookの発想）<h4>他が誤りの理由</h4><b>B</b>：RAGでは<b>contextの情報が優先</b>されます。しかも社内規程が学習データに含まれることはありません。<br><b>C・D</b>：どちらも「<b>更新直後から</b>」というタイミングの一致を説明できません。設定は変えていないのですから。",
+tm:["stale-chunk","rag","observability","trace","hook"]},
+
+{id:"Q36",o:"debug",d:"D7",t:"s",
+qj:"製品サポートBotで、型番「XR-4420B」やエラーコード「E-0317」を含む問い合わせだけ検索精度が著しく低い。最も適切な対策は。",
+qe:"A product support bot has significantly worse retrieval accuracy only for queries containing part numbers like XR-4420B or error codes like E-0317. What is the MOST appropriate fix?",
+cj:["キーワード検索とベクトル検索を組み合わせたhybrid searchを導入し、完全一致の識別子を確実に拾えるようにする","embeddingモデルをより高次元のものに変更する","chunkサイズを2倍に拡大する","system promptに「型番は正確に扱うこと」と記載する"],
+ce:["Introduce hybrid search combining keyword and vector retrieval so exact-match identifiers are reliably found","Switch to an embedding model with higher dimensionality","Double the chunk size","Add to the system prompt: handle part numbers accurately"],
+a:[0],cue:"exact match / identifiers / hybrid search / semantic similarity fails",
+e:"<h4>なぜAか</h4><b>ベクトル検索が構造的に最も苦手なのが「完全一致の識別子」です。</b>「XR-4420B」と「XR-4420C」は意味的にほぼ同一とみなされ、別製品なのに区別できません。ここは<b>キーワード検索（字面の一致）の独壇場</b>です。<br>両者を組み合わせるhybrid searchが定石。意味検索の強み（言い換え耐性）と字句検索の強み（厳密一致）を両取りします。<h4>他が誤りの理由</h4><b>B</b>：次元を上げても<b>「意味で似ている」という性質自体は変わりません</b>。型番の1文字差は救えない。<br><b>C</b>：chunkサイズは検索方式の弱点と無関係。むしろ大きくするとノイズが増えます。<br><b>D</b>：<b>検索の問題をpromptで解こうとする誤答</b>。そもそも文書が取れていないのですから、指示しても出てきません（Q34と同型）。",
+tm:["hybrid-search","rag","stale-chunk","observability"]},
+
+{id:"Q37",o:"protocol",d:"D3",t:"s",
+qj:"エージェントに「社内Wikiの記事を読ませる」「経費申請を承認させる」「別チームの自律エージェントに市場調査を依頼する」の3種を行わせたい。接続方式の組み合わせとして適切なのは。",
+qe:"An agent must (1) read internal wiki articles, (2) approve expense claims, and (3) delegate market research to another team's autonomous agent. Which combination of connection styles is appropriate?",
+cj:["Wiki記事はMCP resource（読み取り）、経費承認はtool（副作用あり・権限と監査の対象）、市場調査はagent-to-agentで委譲する","3つともtoolとして実装し、同一エージェントに全部持たせる","3つともMCP resourceとして公開する","3つともagent-to-agentで他エージェントに委譲する"],
+ce:["Wiki as an MCP resource (read-only), expense approval as a tool (side effects, permissions, audit), market research delegated agent-to-agent","Implement all three as tools on a single agent","Expose all three as MCP resources","Delegate all three agent-to-agent"],
+a:[0],cue:"read-only vs side effects vs delegation to an autonomous peer",
+e:"<h4>3つの接続方式の使い分け</h4><ul><li><b>resource</b>＝読むだけ。副作用なし。権限は閲覧可否のみ</li><li><b>tool</b>＝実行する。副作用あり。<b>権限・監査・上限が必須</b></li><li><b>agent-to-agent</b>＝自律的な相手に<b>目的を委譲</b>する。最も自由度が高く、<b>最も観測が難しい</b></li></ul>この設問は3つがきれいに1対1で対応しています。<h4>他が誤りの理由</h4><b>B</b>：読み取りまでtool化すると<b>権限境界が曖昧になり</b>、しかも全部を1エージェントに持たせるのはcapability bloat（Q16）。<br><b>C</b>：経費承認は<b>副作用のある操作</b>でありresourceにはできません。<br><b>D</b>：Wiki閲覧のような単純な読み取りまで委譲するのは<b>過剰設計</b>。デバッグ不能な構成を自ら作ることになります。<h4>原則</h4><b>必要な最小の自律性を選ぶ。</b>迷ったら弱い方（resource＜tool＜a2a）から。",
+tm:["mcp","a2a","tool-use-loop","least-privilege","capability-bloat","observability"]},
+
+{id:"Q38",o:"protocol",d:"D3",t:"s",
+qj:"長文レポートを生成するチャット機能で、ユーザーから「応答が返るまで無反応で不安」との声がある。総生成時間は変えられない。最も適切な対応は。",
+qe:"In a chat feature that generates long reports, users complain that nothing happens until the full response arrives. Total generation time cannot be reduced. What is the MOST appropriate action?",
+cj:["streamingを有効にし、生成され次第トークンを順次表示して体感待ち時間を短縮する","max_tokensを削って出力を短くする","Message Batchesに切り替えて非同期処理にする","extended thinkingを有効にして品質を上げる"],
+ce:["Enable streaming so tokens are displayed as they are generated, reducing perceived latency","Reduce max_tokens to shorten the output","Switch to Message Batches for asynchronous processing","Enable extended thinking to improve quality"],
+a:[0],cue:"perceived latency / user sees nothing / streaming",
+e:"<h4>なぜAか</h4>問題は<b>「遅い」ことではなく「無反応であること」</b>です。総時間が変えられない以上、打つ手は<b>体感待ち時間(perceived latency)</b>の改善——それがstreamingです。<h4>重要な注意</h4><b>streamingは総処理時間もコストも一切変えません。</b>「速くなる」のではなく「<b>待っている感じがしなくなる</b>」だけ。ここを混同させる選択肢が頻出します。<h4>他が誤りの理由</h4><b>B</b>：<b>要件（長文レポート）を削っています</b>。症状ではなく成果物を壊す解。<br><b>C</b>：<b>典型的な誤答。</b>ユーザーは画面の前で待っています。batchは「<b>人が待っていない</b>」処理専用です（Q22の判断軸）。<br><b>D</b>：品質は論点ではなく、むしろ<b>latencyが悪化します</b>。",
+tm:["streaming","message-batches","p95","extended-thinking","sla"]},
+
+{id:"Q39",o:"protocol",d:"D3",t:"m",
+qj:"外部の自律エージェントに作業を委譲(agent-to-agent)する構成を採用する。必ず設計すべき事項を2つ選べ。",
+qe:"You are adopting an agent-to-agent delegation architecture with an external autonomous agent. Select the TWO items you MUST design for.",
+cj:["委譲先が実行できる操作の範囲・権限・コスト上限・タイムアウトを明示的に契約として定義する","委譲先は自律的なので、制約は設けず自由に判断させる","親子のtraceを紐づけ、委譲先で何が起きたかを呼び出し元から追跡・監査できるようにする","委譲先の応答は信頼できるため、返ってきた結果の検証は不要とする"],
+ce:["Explicitly contract the scope of permitted actions, permissions, cost ceilings, and timeouts for the delegate","Impose no constraints, since the delegate is autonomous and should decide freely","Link parent and child traces so the caller can follow and audit what happened inside the delegate","Skip validation of returned results, since the delegate's output is trustworthy"],
+a:[0,2],cue:"delegation boundary / cost ceiling / distributed tracing / verify results",
+e:"<h4>agent-to-agentの2大リスク</h4><b>A＝境界の消失への対策。</b>自律的な相手に渡すということは<b>制御を手放す</b>ということです。だからこそ<b>操作範囲・権限・コスト上限・タイムアウト</b>を契約として明示する。上限が無いと暴走ループでコストが青天井になります。<br><b>C＝観測の断絶への対策。</b>委譲先が別プロセスだと、traceが途切れて<b>「どこで壊れたか」が完全に不明</b>になります。親子traceの紐付けは必須（Q07の論法を分散系に拡張したもの）。<h4>なぜB・Dが誤りか</h4>どちらも<b>「自律＝信頼してよい」という誤った前提</b>に立っています。自律性が高いほど<b>制約と検証を強める</b>のが正しい方向です。外部から返ってきた結果は<b>常に検証対象</b>——信頼の起点にしてはいけません。",
+tm:["a2a","observability","trace","least-privilege","guardrail","tco"]},
+
+{id:"Q40",o:"latency",d:"D3",t:"s",
+qj:"エージェントのp95 latencyが目標を超過している。並列化と不要処理の削除は既に実施済みで、残る改善余地はモデル関連のみ。精度を守りながら進める手順として最適なのは。",
+qe:"Agent p95 latency still exceeds target. Parallelization and removal of unnecessary work are already done; only model-related changes remain. What is the BEST procedure while protecting accuracy?",
+cj:["許容できる精度低下幅（非劣性マージン）を事前に決め、eval setで小型モデルを比較し、基準を満たせばcanaryで段階投入する","小型モデルに即座に全面切り替えし、問題が出たら戻す","精度目標を下げて、小型モデルでも達成できるようにする","extended thinkingを有効にして、少ない試行で正答するようにする"],
+ce:["Define an acceptable accuracy drop (non-inferiority margin) in advance, compare the smaller model on the eval set, and roll out via canary if it meets the bar","Immediately switch everything to a smaller model and revert if problems appear","Lower the accuracy target so the smaller model can meet it","Enable extended thinking so fewer attempts are needed to get the right answer"],
+a:[0],cue:"non-inferiority margin / decided in advance / eval set / canary",
+e:"<h4>なぜAか</h4>latency改善の正しい順序は<b>①オーケストレーション（無料）→ ②prompt/context削減 → ③モデル変更（精度リスクあり）</b>。①②が済んでいるので③に進みますが、ここで必要なのが<b>非劣性マージン</b>です。<br><b>「事前に」決めることが決定的に重要。</b>後から見ると人は必ず結果に合わせて基準を緩めます（「1.5%低下だが速いから許容しよう」）。事前に「許容は1%まで」と決めておけば、判断が数値で下せます。<h4>他が誤りの理由</h4><b>B</b>：本番で精度事故を起こしてから気づく設計。<b>eval setがあるのに使っていません</b>（Q27と同型）。<br><b>C</b>：<b>基準を結果に合わせて動かす</b>——最も避けるべき行為。Q18のSLA緩和と同じ誤り。<br><b>D</b>：<b>extended thinkingはlatencyを増やします</b>。真逆の施策。",
+tm:["non-inferiority","representative-eval","canary","extended-thinking","p95","tco"]},
+
+{id:"Q41",o:"sysprompt",d:"D2",t:"s",
+qj:"請求書から金額・日付・取引先を抽出するタスクで、出力形式が安定せず後続処理がしばしば失敗する。最も適切な対策は。",
+qe:"A task extracts amount, date, and counterparty from invoices, but the output format is unstable and downstream processing often fails. What is the MOST appropriate fix?",
+cj:["JSON Schemaによる構造化出力を強制し、受信側でもスキーマ検証と値の妥当性チェック（日付形式・金額範囲）を行う","chain-of-thoughtを有効にして、モデルに手順を考えさせてから出力させる","few-shot例を50個に増やして形式を学習させる","system promptに「必ずJSONで出力すること」と大文字で強調する"],
+ce:["Enforce structured outputs with a JSON Schema, and also validate the schema and value plausibility (date format, amount range) on receipt","Enable chain-of-thought so the model reasons through steps before answering","Increase few-shot examples to 50 to teach the format","Emphasize in all caps in the system prompt that output must always be JSON"],
+a:[0],cue:"format must be guaranteed / schema / validate on receipt",
+e:"<h4>なぜAか</h4><b>形式の保証はpromptではなくスキーマで行います</b>（Q23と同じ原則）。ただし重要なのは後半で、<b>structured outputsは「形」を保証しますが「正しさ」は保証しません。</b>スキーマ的に妥当な amount:999999999 は通ってしまいます。<br>だから<b>受信側で値の妥当性（日付形式・金額の範囲・取引先マスタとの照合）を必ずコードで検証</b>する——この二段構えが正解です。<h4>他が誤りの理由</h4><b>B</b>：<b>定型抽出にCoTは不要です。</b>多段推論が必要なタスクにのみ使うもので、ここでは<b>コストとlatencyが増えるだけ</b>。<br><b>C</b>：few-shotは<b>判断基準の提示</b>には効きますが、<b>形式の強制手段としては非効率</b>。50個はcontextの浪費です。<br><b>D</b>：強調は確率を上げるだけで<b>保証になりません</b>。",
+tm:["structured-outputs","deterministic","few-shot","guardrail","context-window"]},
+
+{id:"Q42",o:"lifecycle",d:"D6",t:"s",
+qj:"本番稼働から6か月が経過したAIシステムで、ユーザーからの不満は増えているが、監視ダッシュボードの指標はすべて正常範囲内である。最も適切な対応は。",
+qe:"Six months after launch, user complaints are increasing but every metric on the monitoring dashboard is within normal range. What is the MOST appropriate action?",
+cj:["入力分布の変化（drift）を確認し、人手による修正・却下の履歴を収集してeval setを現状に合わせて更新する","ダッシュボードの閾値を厳しくして、より早く異常を検知できるようにする","ユーザーの不満は主観的なものなので、指標が正常であれば対応不要と判断する","最新のモデルに切り替えて品質を底上げする"],
+ce:["Check for input distribution drift, collect the history of human corrections and rejections, and refresh the eval set to match current reality","Tighten dashboard thresholds to detect anomalies sooner","Conclude that no action is needed since complaints are subjective and metrics are normal","Upgrade to the latest model to raise quality across the board"],
+a:[0],cue:"metrics look fine but users complain / drift / eval set is stale",
+e:"<h4>何が起きているか</h4><b>指標は正常なのに不満が増える＝測っているものが現実とずれています。</b>原因はほぼ<b>drift</b>——6か月の間に入力の分布（顧客層・文書形式・問い合わせ内容）が変わり、<b>ローンチ時のeval setが現在の本番を代表しなくなった</b>のです。古い物差しで測っているので、当然「正常」と出ます。<h4>やるべきこと</h4>① 入力分布の変化を確認 → ② <b>人手の修正・却下履歴</b>を収集（これが最良の失敗事例集）→ ③ eval setを更新 → ④ セグメント別に再測定（Q09）<h4>他が誤りの理由</h4><b>B</b>：<b>間違ったものを、より厳しく測るだけ</b>。<br><b>C</b>：<b>最も危険。</b>ユーザーの不満は先行指標であり、指標が追いついていないだけです。<br><b>D</b>：原因未特定のままモデルを替えるのは<b>層の取り違え</b>（Q07・Q34と同型）。",
+tm:["feedback-loop","representative-eval","aggregate-mask","observability","lifecycle","evalset"]},
+
+{id:"Q43",o:"e2e",d:"D1",t:"s",
+qj:"申請書の受付処理を自動化したい。手順は「①フォーマット検証 ②必須項目の抽出 ③社内マスタとの突合 ④不備があれば差し戻し」で、毎回まったく同じ順序で実行される。最も適切な設計は。",
+qe:"You want to automate intake of application forms. The steps are always the same and in the same order: validate format, extract required fields, match against internal master data, and return for correction if incomplete. What is the MOST appropriate design?",
+cj:["固定手順は決定論的なワークフローとして実装し、LLMは『抽出』の1ステップのみに限定して使う","自律エージェントに4ステップすべてを任せ、順序も自分で判断させる","4ステップそれぞれを別のエージェントにし、agent-to-agentで連携させる","1つの大きなpromptに4ステップすべてを記述し、モデルに一括で処理させる"],
+ce:["Implement the fixed sequence as a deterministic workflow and use the LLM only for the extraction step","Hand all four steps to an autonomous agent and let it decide the order","Make each step a separate agent and connect them agent-to-agent","Write all four steps in one large prompt and have the model do everything at once"],
+a:[0],cue:"same order every time / deterministic workflow vs agent / use the LLM where it adds value",
+e:"<h4>最重要の判断軸</h4><b>手順が毎回同じなら、それはエージェントの仕事ではありません。</b>エージェント（自律的な計画）が必要なのは<b>手順が事前に決まらない</b>ときだけ。固定手順にエージェントを使うと、<b>非決定性・コスト・デバッグ困難</b>を自ら買い込むことになります。<h4>正しい構え</h4>骨格は<b>コードのワークフロー</b>で組み、<b>LLMは「コードで書けない部分」だけ</b>に差し込む。この設問では②抽出のみがそれに当たり、①③④は検証・照合・分岐＝<b>すべてコードの方が速く正確で安い</b>。<h4>他が誤りの理由</h4><b>B</b>：自律性が不要な場所に自律性を与える過剰設計。<br><b>C</b>：さらに悪化。<b>分散トレースの困難さ</b>まで抱え込みます（Q39）。<br><b>D</b>：一括処理は<b>どのステップで失敗したか切り分け不能</b>（Q33と同型）。<h4>覚え方</h4>「<b>毎回同じ順序</b>」が出たら答えは<b>workflow</b>。",
+tm:["e2e","deterministic","structured-outputs","tco","observability"]},
+
+{id:"Q44",o:"e2e",d:"D1",t:"s",
+qj:"顧客向けチャット機能で、LLM APIが一時的に利用不可になった場合の設計として最も適切なのは。",
+qe:"For a customer-facing chat feature, what is the MOST appropriate design for handling temporary unavailability of the LLM API?",
+cj:["リトライ（指数バックオフ）とタイムアウトを設定し、失敗時は定型メッセージと人間窓口への導線を返す。障害はメトリクスとして記録する","無制限にリトライを繰り返し、成功するまで待たせる","エラーをそのままユーザーに表示し、再度試すよう案内する","別ベンダーのモデルに自動で切り替え、検証なしで本番投入する"],
+ce:["Set retries with exponential backoff and timeouts; on failure return a canned message plus a path to a human, and record the failure as a metric","Retry indefinitely until it succeeds","Show the raw error to the user and tell them to try again","Automatically switch to another vendor's model and serve it in production without validation"],
+a:[0],cue:"graceful degradation / fallback / timeout / escalate to human",
+e:"<h4>本番設計の前提</h4><b>外部依存は必ず落ちます。</b>問われているのは「落ちないようにする方法」ではなく<b>「落ちたときにどう振る舞うか」（graceful degradation）</b>です。<h4>必要な4点</h4>① <b>タイムアウト</b>（無限に待たせない）② <b>指数バックオフ付きリトライ</b>（相手をさらに殴らない）③ <b>フォールバック</b>（定型文＋人間への導線）④ <b>記録</b>（メトリクス化して検知する）<h4>他が誤りの理由</h4><b>B</b>：<b>無制限リトライは障害を増幅させます</b>（リトライストーム）。しかもユーザーは待たされ続ける。<br><b>C</b>：生エラーの露出はUX・セキュリティの両面で不適切。<br><b>D</b>：<b>検証なしの切替は品質事故</b>。フェイルオーバー先も事前にeval済みでなければ使えません（Q21）。",
+tm:["production-readiness","runbook","hitl","observability","sla"]},
+
+{id:"Q45",o:"discovery",d:"D6",t:"m",
+qj:"複数部門から10件のAI活用要望が出ている。限られたリソースで最初に着手する案件を選ぶ基準として適切なものを2つ選べ。",
+qe:"Ten AI use-case requests have come in from multiple departments. Select the TWO appropriate criteria for choosing what to build first with limited resources.",
+cj:["業務価値（削減工数・金額）が明確に測定でき、成功判定の数値が定義できること","失敗時の影響が限定的・可逆的で、データとアクセス権限がすでに整っていること","最も技術的に新しく、最新モデルの機能を試せること","最も声の大きい部門からの要望であること"],
+ce:["Business value is clearly measurable (hours or money saved) and a numeric success criterion can be defined","Failure impact is limited and reversible, and the data and access permissions are already in place","It is the most technically novel and lets you try the newest model features","It comes from the department that complains the loudest"],
+a:[0,1],cue:"prioritization / measurable value / feasibility / reversible / data readiness",
+e:"<h4>優先順位づけの2軸</h4><b>A＝価値が測れるか。</b>測れない案件は<b>成功も失敗も証明できず</b>、次の投資を引き出せません。最初の案件は必ず<b>数値で語れるもの</b>を選びます。<br><b>B＝実現可能性とリスク。</b>とくに<b>「データとアクセス権限がすでに整っている」</b>は決定的——ここが未整備だと、AI以前の作業で数か月溶けます。加えて<b>可逆</b>であれば、失敗しても学習で終われます。<h4>なぜCが誤りか</h4><b>技術的新規性は事業価値ではありません。</b>「最新機能を試せる」は選定基準として最悪の部類。<h4>なぜDが誤りか</h4>声の大きさは<b>価値の代理指標になりません</b>。architectの役割は、要望を<b>価値×実現性</b>で客観的に並べ替えることです。",
+tm:["discovery","e2e","production-readiness","sla","adr"]},
+
+{id:"Q46",o:"evalset",d:"D4",t:"s",
+qj:"要約タスクの品質評価をLLM-as-judgeで自動化した。judgeは常に高スコアを返すが、ユーザーからは品質が低いという声がある。最も適切な対応は。",
+qe:"You automated quality scoring for a summarization task with LLM-as-judge. The judge consistently gives high scores, but users report low quality. What is the MOST appropriate action?",
+cj:["人手でラベル付けした基準セットとjudgeの判定の一致率を測り、judge自体のプロンプトと評価基準を較正する","judgeにより高性能なモデルを使い、スコアを信頼する","judgeのスコア閾値を引き上げて、合格しにくくする","ユーザーの声は主観的なので、judgeのスコアを優先する"],
+ce:["Measure agreement between the judge and a human-labeled gold set, then calibrate the judge's prompt and rubric","Use a more capable model as the judge and trust its scores","Raise the judge's score threshold so fewer outputs pass","Prioritize the judge's score since user feedback is subjective"],
+a:[0],cue:"the judge is also under test / agreement with human labels / calibration",
+e:"<h4>最重要原則</h4><b>判定者もまた検証の対象です。</b>LLM-as-judgeは便利ですが、<b>較正されていないjudgeは「常に褒める」方向に偏る</b>のが典型的な失敗。judgeのスコアを信じる前に、<b>人手ラベルとの一致率</b>を測らなければなりません。<h4>正しい手順</h4>① 人手で採点した<b>gold set</b>を数十件作る → ② judgeに同じものを採点させる → ③ <b>一致率・相関</b>を測定 → ④ ずれていればrubric（評価基準）を具体化して再測定 → ⑤ 一致率が十分になって初めて自動採点を信用する<h4>他が誤りの理由</h4><b>B</b>：<b>較正していないモデルを、より強いモデルに替えても偏りは残ります</b>。<br><b>C</b>：<b>壊れた物差しの目盛りを動かすだけ</b>。<br><b>D</b>：<b>最も危険。</b>ユーザーの声は先行指標で、judgeが現実に追いついていないだけです（Q42と同型）。",
+tm:["llm-as-judge","representative-eval","evalset","aggregate-mask","feedback-loop"]},
+
+{id:"Q47",o:"evalset",d:"D4",t:"m",
+qj:"本番稼働中のRAGアシスタントの品質を継続的に測る。オフライン評価と本番指標の組み合わせとして適切なものを2つ選べ。",
+qe:"You need to continuously measure the quality of a live RAG assistant. Select the TWO appropriate combinations of offline evaluation and production signals.",
+cj:["オフラインではeval setに対する正答率・引用の妥当性・retrievalのrecallを定期実行し、変更時は必ず回帰させる","本番では引用クリック率・人手での修正率・エスカレーション率・再質問率を収集し、セグメント別に監視する","オフライン評価だけを実施し、本番の指標は収集しない","本番のユーザー満足度アンケートのみを指標とし、オフライン評価は行わない"],
+ce:["Offline: regularly run accuracy, citation validity, and retrieval recall against the eval set, and re-run on every change","Production: collect citation click-through, human correction rate, escalation rate, and re-ask rate, monitored by segment","Run offline evaluation only and collect no production signals","Use only a production user-satisfaction survey and skip offline evaluation"],
+a:[0,1],cue:"offline eval plus production signals / proxy metrics / segment monitoring",
+e:"<h4>両輪が必要な理由</h4><b>A＝オフライン評価</b>は<b>変更前に</b>劣化を止める装置（回帰テスト）。ただし<b>本番の分布から必ずずれていきます</b>（drift）。<br><b>B＝本番指標</b>は<b>実際に起きていること</b>を映します。とくに<b>人手での修正率・再質問率</b>は、ユーザーが「使えなかった」ことを示す<b>最良の代理指標</b>で、しかもそのままeval setの素材になります（Q42）。<h4>なぜCが誤りか</h4>オフラインだけでは<b>driftを検知できません</b>。指標は正常なのに不満が増える状態に陥ります。<h4>なぜDが誤りか</h4>アンケートは<b>回収率が低く、遅く、粒度が粗い</b>。しかもオフライン評価がないと<b>変更前に劣化を止められず</b>、本番で事故ってから気づくことになります。",
+tm:["evalset","representative-eval","regression-test","feedback-loop","observability","aggregate-mask"]},
+
+{id:"Q48",o:"evalset",d:"D4",t:"s",
+qj:"promptとtool定義が週に数回更新されるプロジェクトで、品質劣化に気づくのがいつも本番リリース後になっている。最も効果的な仕組みは。",
+qe:"In a project where prompts and tool definitions change several times a week, quality regressions are always discovered only after release. What is the MOST effective mechanism?",
+cj:["eval setの実行をCIに組み込み、prompt/toolの変更PRごとに自動で回帰テストを走らせ、基準未達ならマージをブロックする","リリース前に担当者が手動でいくつか試して確認する","リリース頻度を月1回に減らし、変更をまとめて出す","本番リリース後に監視を強化し、問題があればすぐ戻せるようにする"],
+ce:["Run the eval set in CI so every prompt/tool change PR is automatically regression-tested, blocking merge if it falls below the bar","Have someone manually try a few cases before each release","Reduce release frequency to once a month and batch the changes","Strengthen post-release monitoring so you can roll back quickly if problems appear"],
+a:[0],cue:"prompt changes are code changes / CI / block merge / automated regression",
+e:"<h4>なぜAか</h4><b>prompt変更はコード変更です</b>（Q27）。コードにCIとテストがあるなら、promptにも同じものが要ります。<b>人間の記憶や善意に依存させず、仕組みで止める</b>——Q32のhookと同じ思想です。<br>ポイントは<b>「マージをブロックする」</b>こと。警告だけでは必ず無視されます。<h4>他が誤りの理由</h4><b>B</b>：手動確認は<b>代表性がなく、忘れられ、人によってばらつきます</b>。今まさに機能していない方法。<br><b>C</b>：リリース頻度を下げると<b>1回の変更量が増え、障害時の切り分けがむしろ困難になります</b>。<br><b>D</b>：<b>次善の策ではあるが受け身。</b>rollbackは必要ですが、それは「事故った後」の話。<b>本番前に止められる仕組みがあるのに使わない</b>のは不適切です。",
+tm:["regression-test","evalset","canary","hook","deterministic","representative-eval"]},
+
+{id:"Q49",o:"guardrail",d:"D5",t:"s",
+qj:"医療機関向けのAIアシスタントで、患者データを扱う。データガバナンス設計として最も適切なのは。",
+qe:"An AI assistant for healthcare providers handles patient data. What is the MOST appropriate data governance design?",
+cj:["PIIは必要最小限のみをcontextに渡し、ログはマスキング、保存先リージョンと保持期間を規定し、アクセスは役割ベースで制限して監査記録を残す","患者データは重要なので、すべてのやり取りを平文で永久保存する","PIIをすべて削除してから処理し、患者を特定できない状態でのみ運用する","ベンダーがセキュアなので、追加のデータ統制は不要と判断する"],
+ce:["Pass only the minimum necessary PII into context; redact logs; define storage region and retention; restrict access by role and keep audit records","Store every interaction in plaintext forever, since patient data is important","Strip all PII before processing and operate only on fully de-identified data","Conclude no additional controls are needed because the vendor is secure"],
+a:[0],cue:"data minimization / redaction / retention / residency / role-based access / audit",
+e:"<h4>データガバナンスの5点セット</h4>① <b>最小化</b>（必要な項目だけ渡す）② <b>マスキング</b>（ログに生PIIを残さない）③ <b>保持期間とリージョン</b>（規制対応）④ <b>役割ベースのアクセス制御</b>⑤ <b>監査記録</b>。Aはこれを全部満たします。<h4>他が誤りの理由</h4><b>B</b>：<b>平文・永久保存は規制違反</b>。保持していること自体がリスクです（Q06）。<br><b>C</b>：<b>一見正しく見える罠。</b>患者を特定できなければ<b>業務が成立しません</b>（誰のカルテか分からない）。正解は「全削除」ではなく<b>最小化＋統制</b>です。<br><b>D</b>：<b>責任は委託できません。</b>ベンダーの安全性と、あなたの業務固有の統制はまったく別物（Q24）。",
+tm:["pii","audit-trail","least-privilege","sampling","guardrail","deterministic"]},
+
+{id:"Q50",o:"guardrail",d:"D5",t:"s",
+qj:"融資審査を補助するAIで、モデルの確信度が低い、または入力が想定外だった場合の実行時の振る舞いとして最も適切なのは。",
+qe:"In an AI that assists loan underwriting, what is the MOST appropriate runtime behavior when model confidence is low or the input is out of scope?",
+cj:["処理を停止して人間の審査官にエスカレーションし、理由と入力を記録する（fail closed）","確信度が低くても、とりあえず判定結果を返して業務を止めない","確信度の閾値を下げて、より多くのケースを自動処理できるようにする","モデルに『分からない場合は最も可能性が高い答えを選べ』と指示する"],
+ce:["Stop and escalate to a human underwriter, recording the reason and the input (fail closed)","Return a decision anyway so the process is not blocked, even at low confidence","Lower the confidence threshold so more cases can be automated","Instruct the model to pick the most likely answer when it is unsure"],
+a:[0],cue:"low confidence / out of scope / fail closed / escalate",
+e:"<h4>原則：高リスク領域では fail closed</h4>融資審査は<b>不可逆で影響が大きく、規制対象</b>です。判断がつかないときに止まる（fail closed）のが正しい設計。<b>止まって困るのは業務ですが、誤って通して困るのは会社と顧客です。</b><br>さらに<b>理由と入力を記録</b>することで、その事例が<b>eval setの材料</b>になります（Q19のフィードバックループ）。<h4>他が誤りの理由</h4><b>B</b>：<b>fail open</b>——最も危険。低確信のまま不可逆な判断を下しています。<br><b>C</b>：<b>リスクを直視せず閾値を動かす</b>（Q40のCと同型）。自動化率という指標のために安全性を売っています。<br><b>D</b>：<b>「分からない」を消すのは最悪の指示。</b>不確実性は<b>価値ある情報</b>であり、隠すとHITLのトリガーが機能しなくなります。",
+tm:["fail-closed","hitl","guardrail","feedback-loop","audit-trail","deterministic"]},
+
+{id:"Q51",o:"hitl",d:"D5",t:"m",
+qj:"採用書類のスクリーニングを支援するAIを導入する。責任あるAIの観点から必須の対策を2つ選べ。",
+qe:"You are deploying an AI to assist with screening job applications. Select the TWO measures that are essential from a responsible AI standpoint.",
+cj:["性別・年齢・出身などの属性別に精度と合格率を分解して継続測定し、有意な差があれば是正する","最終判断は人間が行うことを明示し、AIの出力は根拠とともに提示して、応募者にAI利用を開示する","全体の精度が高ければ、属性別の検証は不要と判断する","バイアスを避けるため、判断理由は一切出力させず結果のみを返す"],
+ce:["Continuously measure accuracy and pass rates broken down by attributes such as gender, age, and origin, and remediate significant gaps","Make clear that humans make the final decision, present outputs with their rationale, and disclose AI use to applicants","Skip attribute-level verification as long as overall accuracy is high","Output only the result with no reasoning, to avoid bias"],
+a:[0,1],cue:"fairness testing by subgroup / human final decision / transparency / disclosure",
+e:"<h4>高リスク領域の2本柱</h4><b>A＝公平性の継続測定。</b>これはQ09の「集約値はセグメントを隠す」を<b>公平性に適用したもの</b>です。全体精度95%でも特定属性で大きく差が出る構造は現実に頻発します。<b>一度測って終わりではなく継続</b>すること。<br><b>B＝透明性と人間の最終判断。</b>採用は<b>不可逆で個人の人生に影響する</b>——HITLの必須条件（Q25）を完全に満たします。加えて<b>根拠の提示</b>と<b>AI利用の開示</b>が、規制対応と説明責任の両方に必要です。<h4>なぜCが誤りか</h4><b>まさにこの油断が差別を見逃します。</b>集約値は不公平を隠す方向に働きます。<h4>なぜDが誤りか</h4><b>完全な逆。</b>理由を出さなければバイアスは<b>消えるのではなく、検証不能になるだけ</b>です。不透明性は公平性の敵であり、説明責任も果たせません。",
+tm:["aggregate-mask","hitl","guardrail","audit-trail","representative-eval","feedback-loop"]}
+
+];
+
 window.G=G;window.O=O;window.Q=Q;
