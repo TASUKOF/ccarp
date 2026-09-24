@@ -549,4 +549,11 @@ tm:["aggregate-mask","hitl","guardrail","audit-trail","representative-eval","fee
 
 ];
 
+/* ===== 英語を主・日本語を補足に入れ替え ===== */
+Q.forEach(function(q){
+  var t = q.qj; q.qj = q.qe; q.qe = t;
+  var c = q.cj; q.cj = q.ce; q.ce = c;
+});
+
+window.G=G;window.O=O;window.Q=Q;
 window.G=G;window.O=O;window.Q=Q;
