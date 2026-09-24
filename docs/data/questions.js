@@ -244,8 +244,119 @@ cj:["独立したtool呼び出しを並列化し、使用頻度の低い照会�
 ce:["Parallelize independent tool calls and make the rarely-needed lookup conditional or asynchronous","Switch to a smaller, faster model","Halve max_tokens to shorten outputs","Relax the p95 SLA to 3.5 seconds"],
 a:[0],cue:"p95 / sequential / in parallel / accuracy-latency trade-off",
 e:"<h4>なぜAか</h4><b>精度を落とさずにlatencyを削れる余地は、まずモデルではなくオーケストレーションにあります。</b>直列→並列、不要な照会の条件化・非同期化は<b>精度を一切犠牲にしません</b>。しかもこの設問では85%のケースで1系統まるごと省けます。<h4>他が誤りの理由</h4><b>B</b>：いきなり小型化は<b>精度SLAを壊すリスク</b>があり、検証手順も示されていません。<br><b>C</b>：出力の切り詰めは品質低下。<br><b>D</b>：<b>SLA緩和は最後の手段。</b>技術的余地を使い切る前に事業要件を下げるのはarchitectとして不適切です。",
-tm:["p95","sla","non-inferiority","tco"]}
-
+tm:["p95","sla","non-inferiority","tco"]}   
 ];
 
+/* ===== 追加分 Q19-Q30 ===== */
+Q.push(
+
+{id:"Q19",o:"e2e",d:"D1",t:"s",
+qj:"保険金請求の自動査定システムを設計する。月20万件、うち約8%は不正の疑いで人間の調査官に回す必要がある。end-to-endアーキテクチャとして最も適切なのは。",
+qe:"You are designing an automated insurance claims assessment system: 200K claims/month, about 8% require escalation to human investigators for suspected fraud. Which end-to-end architecture is MOST appropriate?",
+cj:["定型請求は小型モデルで構造化出力＋スキーマ検証、閾値以下の確信度と高額案件のみ人間にルーティングし、調査官の判断をeval setに還流する","全件を最上位モデルで処理し、全件を調査官がレビューする","全件を小型モデルで処理し、人間のレビューは行わない","全件をMessage Batchesで夜間処理し、翌朝まとめて結果を返す"],
+ce:["Process routine claims with a small model using structured outputs and schema validation; route only low-confidence and high-value cases to humans; feed investigator decisions back into the eval set","Process everything with the largest model and have investigators review every case","Process everything with a small model and skip human review entirely","Batch all claims overnight and return results the next morning"],
+a:[0],cue:"end-to-end / routing / feedback loop / human review where it matters",
+e:"<h4>end-to-end設計の4要素</h4>①<b>ルーティング</b>（負荷に応じたモデル配分）②<b>決定論的検証</b>（スキーマ＋業務ルール）③<b>HITLの配置</b>（不可逆×高影響×低信頼の交点のみ）④<b>フィードバックループ</b>——Aだけが全部を満たします。<h4>とくに④が重要</h4>調査官の判断を<b>eval setに還流</b>する経路が無いと、システムは静かに劣化(drift)します。「作って終わり」ではなく「学習する運用」がend-to-endの定義です。<h4>他が誤りの理由</h4><b>B</b>：全件レビューは<b>形骸化(rubber-stamp)</b>し、コストだけ払って統制を失う最悪パターン。<br><b>C</b>：8%の不正案件を<b>不可逆に自動承認</b>してしまう。<br><b>D</b>：請求者は待っています。batchは「人が待っていない」処理にのみ使います。",
+tm:["e2e","router","hitl","feedback-loop","structured-outputs","message-batches"]},
+
+{id:"Q20",o:"e2e",d:"D1",t:"s",
+qj:"PoCでは95%の精度が出た社内文書要約エージェントを本番展開したい。経営層は「PoCが成功したので来週リリースしよう」と言っている。アーキテクトとして最初に確認すべきことは。",
+qe:"A document summarization agent achieved 95% accuracy in PoC. Leadership wants to launch next week because the PoC succeeded. As the architect, what should you verify FIRST?",
+cj:["本番の負荷・SLA・アクセス権限・監査要件・障害時の対応とrollback手順・運用ownerが定義されているか","PoCの精度をさらに98%まで高められるか","より新しいモデルが使えるかどうか","UIのデザインが完成しているか"],
+ce:["Whether production load, SLA, access permissions, audit requirements, incident response and rollback procedures, and a named operational owner are all defined","Whether accuracy can be pushed further to 98%","Whether a newer model is available","Whether the UI design is complete"],
+a:[0],cue:"production readiness / PoC is not production / owner / rollback",
+e:"<h4>核心：PoC成功 ≠ 本番可</h4>PoCが検証したのは<b>「技術的に可能か」だけ</b>です。本番に必要なのは別次元の要件です。<ul><li><b>規模</b>：PoCの100件と本番の20万件は別物</li><li><b>SLA</b>：p95何秒？誰が約束する？</li><li><b>権限・監査</b>：誰の権限で動く？記録は？</li><li><b>障害対応</b>：壊れたら誰が何をする？<b>戻せるか</b>？</li><li><b>owner</b>：<b>名前のついた責任者がいるか</b></li></ul><h4>他が誤りの理由</h4><b>B</b>：精度は<b>すでに十分かもしれない</b>。要件未定義のまま数字を上げるのは的外れ。<br><b>C・D</b>：本番適合性と無関係。<h4>覚え方</h4>「PoCが成功した」という文が出たら、<b>反射的にproduction readinessを疑う</b>。",
+tm:["production-readiness","sla","named-owner","runbook","audit-trail"]},
+
+{id:"Q21",o:"modelsel",d:"D2",t:"s",
+qj:"新しいモデルが公開ベンチマークで最高スコアを記録した。チームは自社の文書分類パイプラインを全面的に切り替えたいと提案している。アーキテクトとして最も適切な助言は。",
+qe:"A new model tops public benchmarks. The team proposes switching the entire document classification pipeline to it. What is the MOST appropriate advice as an architect?",
+cj:["自社のrepresentative eval setで現行モデルと同一promptで比較し、精度・latency・コストがSLAと予算を満たすか測ってから判断する","ベンチマーク1位なので即座に切り替える","最も安いモデルに統一してコストを優先する","現行モデルを維持し、新モデルは検討しない"],
+ce:["Compare it against the current model on your representative eval set with identical prompts, and decide based on measured accuracy, latency, and cost versus SLA and budget","Switch immediately because it is ranked first on benchmarks","Standardize on the cheapest model to prioritize cost","Keep the current model and do not evaluate the new one"],
+a:[0],cue:"benchmark scores alone / on your own data / representative / trade-offs",
+e:"<h4>なぜAか</h4><b>公開ベンチマークは、あなたのタスクの入力分布を代表しません。</b>判断根拠は常に<b>自分のデータでの測定値</b>です。<h4>正しい手順（4段）</h4>① 合格基準を定義 → ② representative eval setを作る → ③ 候補を<b>同一prompt</b>で比較 → ④ <b>SLAを満たす中で最も安く速いもの</b>を選ぶ<h4>他が誤りの理由</h4><b>B</b>：典型的誤答。制約検証を飛ばしています。<br><b>C</b>：タスク適合の検証なし。しかも<b>精度低下で人手レビューが増えればTCOは逆に上がります</b>。<br><b>D</b>：評価の放棄。変化の速い領域では定期的な再評価が必要です。",
+tm:["representative-eval","non-inferiority","tco","sla","router"]},
+
+{id:"Q22",o:"modelsel",d:"D2",t:"s",
+qj:"大量の単純分類（1日30万件・p95 800ms要求）と、少数の複雑な契約分析（日次バッチ）が同じパイプラインに混在している。最適な構成は。",
+qe:"High-volume simple classification (300K/day, p95 800ms) and a small number of complex contract analyses (daily batch) share one pipeline. What is the BEST configuration?",
+cj:["routerで振り分け、分類は小型モデル＋厳格なenum出力で同期処理、契約分析は上位モデルでMessage Batchesによる非同期処理","すべて最上位モデルで統一し、品質を最大化する","すべて最小モデルに統一し、コストを最小化する","すべてを同期APIで処理し、契約分析にはextended thinkingを常時ONにする"],
+ce:["Route by task: classification on a small model with strict enum output served synchronously; contract analysis on a larger model via Message Batches asynchronously","Standardize on the largest model for everything to maximize quality","Standardize on the smallest model for everything to minimize cost","Serve everything synchronously and always enable extended thinking for contract analysis"],
+a:[0],cue:"routing / latency-tolerant vs blocking / smallest model that meets",
+e:"<h4>なぜAか</h4><b>単一モデルへの統一は、コストか精度のどちらかを必ず犠牲にします。</b>負荷の形に合わせて経路を分けるのが定石。<h4>同期 vs バッチの判断軸</h4><b>「人が待っているか」の一点</b>で切れます。<ul><li>待っている（画面・チャット）＝ <b>同期API</b></li><li>待っていない（夜間・移行・再計算）＝ <b>Message Batches</b></li></ul><h4>他が誤りの理由</h4><b>B</b>：過剰でSLA（800ms）とコストを壊す。<br><b>C</b>：契約分析のタスク適合検証を飛ばしている。<br><b>D</b>：<b>extended thinking常時ONはコストとlatencyを押し上げます</b>。必要なケースに限定するのが原則。",
+tm:["router","message-batches","extended-thinking","structured-outputs","sla"]},
+
+{id:"Q23",o:"sysprompt",d:"D2",t:"s",
+qj:"医療問診エージェントに「診断を断定してはならない」という規制要件がある。system promptに明記したが、稀に断定的な表現が出てしまう。最も適切な追加対策は。",
+qe:"A medical intake agent must never state a definitive diagnosis, per regulation. This is written in the system prompt, but definitive phrasing still slips through occasionally. What is the MOST appropriate additional measure?",
+cj:["出力後に決定論的なバリデーション層を置き、禁止パターンを検知したらブロックして安全な定型文に差し替える","system promptの該当箇所を大文字・強調で書き直し、繰り返し記述する","temperatureを0にして出力を安定させる","few-shot例を20個に増やして望ましい表現を学習させる"],
+ce:["Add a deterministic post-generation validation layer that blocks prohibited patterns and substitutes a safe canned response","Rewrite that instruction in all caps with emphasis and repeat it several times","Set temperature to 0 to stabilize outputs","Increase few-shot examples to 20 to teach the desired phrasing"],
+a:[0],cue:"hard requirement / must never / deterministic enforcement / not prompt-only",
+e:"<h4>最重要原則</h4><b>「絶対に」「must never」を満たせるのは、promptではなくコードだけ。</b>promptはモデルへの<b>お願い</b>であり、確率的にしか従いません。99.9%守れても、規制要件では1回の違反が致命的です。<h4>正しい構え（多層防御）</h4>① promptで指示（ベースライン）→ ② <b>出力後にコードで検証</b>（保証）→ ③ 違反時はブロック＋定型文 → ④ 記録してeval setへ<h4>他が誤りの理由</h4><b>B・D</b>：どちらも<b>確率を上げるだけで保証にならない</b>。強調しても100%にはなりません。<br><b>C</b>：temperature 0は<b>出力を固定しません</b>（同じ入力に同じ出力が出やすくなるだけ）。禁止表現の抑止とは無関係です。",
+tm:["deterministic","guardrail","sysprompt","structured-outputs","hitl"]},
+
+{id:"Q24",o:"guardrail",d:"D5",t:"m",
+qj:"顧客対応エージェントの安全統制を多層で設計する。入力側・実行側・出力側それぞれで必要な対策として適切なものを2つ選べ。",
+qe:"You are designing layered safety controls for a customer-facing agent. Select the TWO appropriate measures across the input, execution, and output layers.",
+cj:["入力側でPII検出とprompt injectionパターンの検査を行い、実行側でtool allowlistと1リクエストあたりの実行回数上限を設ける","出力側でJSON Schemaによる形式検証と、引用元が存在しない主張のブロックを行う","すべての制御をsystem promptに集約し、一箇所で管理する","モデルの安全性に依拠し、アプリ側の追加制御は設けない"],
+ce:["At input: detect PII and prompt-injection patterns. At execution: enforce a tool allowlist and a per-request cap on tool invocations","At output: validate against a JSON Schema and block claims that lack a supporting citation","Consolidate all controls in the system prompt for single-point management","Rely on the model's built-in safety and add no application-level controls"],
+a:[0,1],cue:"defense in depth / input, execution, output layers",
+e:"<h4>多層防御の3層</h4><ul><li><b>入力側</b>：PII検出、injection検査、サイズ制限</li><li><b>実行側</b>：tool allowlist、<b>実行回数上限</b>（暴走ループの停止）、権限チェック</li><li><b>出力側</b>：スキーマ検証、禁止表現、<b>根拠(citation)の有無</b></li></ul>A＝入力+実行、B＝出力。<b>2つ合わせて全層をカバー</b>します。<h4>なぜCが誤りか</h4><b>単一障害点</b>になります。しかもpromptは決定論的ではないので、「一箇所で管理」した瞬間に保証がゼロになります。<h4>なぜDが誤りか</h4>モデルの安全機構は<b>汎用的な有害性</b>には効きますが、<b>あなたの業務固有のルール</b>（この顧客の情報だけ見てよい等）は一切知りません。",
+tm:["guardrail","prompt-injection","pii","least-privilege","structured-outputs","deterministic"]},
+
+{id:"Q25",o:"hitl",d:"D5",t:"s",
+qj:"契約書レビューエージェントで、現在は全出力を法務が確認している。法務の負荷が限界で、確認が形骸化しているとの指摘がある。最適な見直しは。",
+qe:"A contract review agent currently has legal review every output. Legal is overloaded and reviews have become rubber-stamping. What is the BEST revision?",
+cj:["不可逆性・影響金額・モデル確信度の3軸で分類し、高リスク帯のみ人間レビューを必須とする。低リスク帯はサンプリング監査に切り替える","レビュー担当者を増員して全件確認を維持する","全件の人間レビューを廃止し、完全自動化する","レビュー時間を1件30秒に制限して処理速度を上げる"],
+ce:["Classify by irreversibility, financial impact, and model confidence; require human review only for the high-risk band and move the low-risk band to sampled audits","Hire more reviewers to maintain 100% review","Eliminate human review entirely and fully automate","Cap review time at 30 seconds per item to increase throughput"],
+a:[0],cue:"rubber-stamp / where it matters / irreversible / high impact / low confidence",
+e:"<h4>HITL配置の原則</h4>人間を置くのは<b>「不可逆 × 高影響 × 低信頼」の交点だけ</b>です。<br><b>全件レビューは統制ではありません。</b>形骸化(rubber-stamp)した瞬間、コストだけ払って実効性はゼロ——むしろ「レビュー済み」という<b>誤った安心感</b>を生むぶん危険です。<h4>低リスク帯の扱い</h4>放置ではなく<b>サンプリング監査</b>に切り替えます。全件は見ないが、抜き取りで品質は監視し続ける。<h4>他が誤りの理由</h4><b>B</b>：スケールしないうえ、形骸化の原因（量）を解決していない。<br><b>C</b>：不可逆な高額案件まで自動化するのは過剰。<br><b>D</b>：<b>形骸化を制度化する</b>最悪の選択肢。",
+tm:["hitl","guardrail","feedback-loop","production-readiness"]},
+
+{id:"Q26",o:"evalset",d:"D4",t:"m",
+qj:"本番投入前のeval datasetを構築する。含めるべき要素として適切なものを2つ選べ。",
+qe:"You are building an eval dataset before production launch. Select the TWO elements that should be included.",
+cj:["本番の入力分布を反映した代表サンプルと、過去に発生した障害・誤答ケース","公開ベンチマークの標準問題セットをそのまま流用したもの","境界条件（空入力・極端に長い入力・多言語・悪意ある入力）と、セグメント別に分解可能なラベル","モデルが高得点を出せることが確認済みの、易しい事例のみ"],
+ce:["Representative samples reflecting the production input distribution, plus past incidents and known failure cases","A public benchmark suite used as-is","Edge cases (empty input, extremely long input, multilingual, adversarial) and labels that allow segment-level breakdown","Only easy cases the model is already known to score well on"],
+a:[0,2],cue:"representative / edge cases / regression / past incidents",
+e:"<h4>良いeval setの2本柱</h4><b>A＝代表性と回帰</b>：本番の分布を映していなければ測る意味がありません。さらに<b>過去の障害を必ず入れる</b>——これが回帰テストになり、同じ失敗の再発を止めます。<br><b>C＝頑健性と分解可能性</b>：境界条件は本番で必ず来ます。そして<b>セグメント別ラベル</b>が無いと、Q09で見た「全体95%だが特定業種60%」を永遠に発見できません。<h4>なぜBが誤りか</h4>公開ベンチマークは<b>あなたのタスクを代表しません</b>。参考にはなっても判断根拠にはならない。<h4>なぜDが誤りか</h4><b>評価の自己欺瞞。</b>易しい事例だけのセットは「合格」しか出さず、測定器として機能していません。",
+tm:["representative-eval","regression-test","evalset","aggregate-mask","llm-as-judge"]},
+
+{id:"Q27",o:"evalset",d:"D4",t:"s",
+qj:"promptを改善したところ、手元の10件で明らかに出力が良くなった。本番反映の進め方として最適なのは。",
+qe:"After improving a prompt, outputs look clearly better on 10 hand-picked examples. What is the BEST way to roll it out?",
+cj:["eval setで旧版と新版を比較し、全体と各セグメントで劣化がないことを確認してから、canaryで一部トラフィックに投入して監視する","10件で改善が確認できたので、即座に全トラフィックへ反映する","新版と旧版を交互に使い、ユーザーの反応を見る","prompt変更は軽微なのでレビューなしで本番に適用する"],
+ce:["Compare old vs new on the eval set, confirm no regression overall and per segment, then roll out to a small traffic slice as a canary with monitoring","Roll out to 100% immediately since 10 examples improved","Alternate between the old and new prompt and watch user reactions","Apply directly to production without review since prompt changes are minor"],
+a:[0],cue:"regression / eval set / canary / prompt changes are code changes",
+e:"<h4>最重要の心構え</h4><b>prompt変更はコード変更と同じです。</b>「テキストを書き換えただけ」ではなく、<b>システムの挙動を変える変更</b>です。<h4>正しい手順</h4>① eval setで旧版と比較 → ② <b>セグメント別にも劣化がないか</b>確認（Q09の論法）→ ③ canaryで数%に投入 → ④ 指標を監視 → ⑤ 問題なければ拡大<h4>10件がダメな理由</h4><b>手元の10件は選ばれたサンプル</b>であり、代表性がありません。あるケースが良くなった裏で、別のケースが壊れている（<b>回帰</b>）可能性が見えていない。<h4>他が誤りの理由</h4><b>C</b>：比較設計がなく、「反応を見る」では定量判断できません。<br><b>D</b>：<b>最も危険な発想。</b>本番障害の典型原因です。",
+tm:["regression-test","representative-eval","canary","evalset","observability"]},
+
+{id:"Q28",o:"discovery",d:"D6",t:"m",
+qj:"事業部門から「AIチャットボットを導入したい」という要望を受けた。構造化discoveryの初期段階で必ず確認すべき項目を2つ選べ。",
+qe:"A business unit requests an AI chatbot. Select the TWO items you MUST clarify in the early stage of structured discovery.",
+cj:["現在の業務フローと処理件数、そして現状は誰がどんな基準で判断しているか","失敗した場合に何が起きるか（影響度・不可逆性）と、成功をどの数値でいつ測るか","どのモデルを使うか、どのベクトルDBを採用するか","UIのカラーテーマとチャットウィンドウの配置"],
+ce:["The current workflow and volume, and who makes the decision today using what criteria","What happens if it fails (impact, irreversibility), and what metric will define success and by when","Which model to use and which vector database to adopt","The UI color theme and chat window placement"],
+a:[0,1],cue:"structured discovery / problem not solution / how do you do it today / how will we measure",
+e:"<h4>discoveryの鉄則</h4><b>「解」ではなく「問題」を特定する工程です。</b>相手は既に解（チャットボット）を言っていますが、それが正しい解かはまだ誰も検証していません。<h4>必ず聞く5点</h4>① 現状フロー　② 件数　③ 失敗時の影響　④ 現在の判断基準　⑤ 成功の測り方<br>A＝①②④、B＝③⑤。<b>2つで5点すべてを網羅</b>します。<h4>とくに④が重要な理由</h4>「現状は誰がどんな基準で判断しているか」——これが分からないと<b>eval setも作れず、正解も定義できません</b>。人間の暗黙知を言語化する作業そのものです。<h4>なぜCが誤りか</h4>技術選定は<b>要件が決まった後</b>の話。順序が逆です。discovery段階でこれを聞くのは「解から入る」典型的失敗。",
+tm:["discovery","sla","e2e","representative-eval","production-readiness"]},
+
+{id:"Q29",o:"discovery",d:"D6",t:"s",
+qj:"ステークホルダーが「AIで全部自動化してミスをゼロにしたい」と期待している。アーキテクトとして最も適切な対応は。",
+qe:"A stakeholder expects to automate everything with AI and achieve zero errors. What is the MOST appropriate response as an architect?",
+cj:["現実的な精度目標をベースラインと共に数値で提示し、残存誤りの検知方法・影響範囲・人間が介在する条件を合意文書にする","「AIは完璧ではない」と口頭で説明して理解を求める","期待に応えるため、精度100%を目標として設定する","技術的に不可能なので、プロジェクト自体を見送るよう提案する"],
+ce:["Present a realistic accuracy target with a baseline in numbers, and document an agreement on how residual errors are detected, their blast radius, and when humans intervene","Verbally explain that AI is not perfect and ask for understanding","Set a 100% accuracy target to meet their expectations","Recommend cancelling the project since it is technically impossible"],
+a:[0],cue:"expectation alignment / measurable / baseline / agreement",
+e:"<h4>期待値調整の原則</h4><b>期待は言葉ではなく、数値と手順で揃えます。</b>「完璧ではありません」と言うだけでは、相手の頭の中の期待値は1ミリも動きません。<h4>提示すべき3点セット</h4>① <b>ベースライン</b>（現在の人間の精度は何%か——たいてい100%ではない）② <b>目標値</b>（現実的な数値）③ <b>残り○%をどう扱うか</b>（検知方法・影響範囲・人間の介在条件）<h4>他が誤りの理由</h4><b>B</b>：口頭は<b>記録に残らず</b>、後で必ず認識齟齬になります。<br><b>C</b>：達成不能な約束は<b>プロジェクトを確実に失敗させます</b>。<br><b>D</b>：期待値を調整すれば<b>十分に価値を出せる</b>可能性を捨てています。architectの仕事は「できない」と言うことではなく「できる形に設計する」ことです。",
+tm:["sla","discovery","hitl","production-readiness","adr"]},
+
+{id:"Q30",o:"lifecycle",d:"D6",t:"m",
+qj:"構築したAIシステムを運用チームへ引き継ぐ。handoffに必須の要素を2つ選べ。",
+qe:"You are handing off an AI system to an operations team. Select the TWO elements that are essential for the handoff.",
+cj:["アーキテクチャ決定記録（なぜこの設計にし、どの案をなぜ却下したか）と、既知の制約・禁止事項","障害時のrunbook（症状別の対応手順・rollback方法・エスカレーション先）と、監視項目・閾値・named owner","開発中に使用したすべてのブランチとコミット履歴の一覧","チームメンバー全員の連絡先と過去の議事録すべて"],
+ce:["Architecture decision records (why this design, which alternatives were rejected and why) and known constraints and prohibited changes","An incident runbook (symptom-based procedures, rollback steps, escalation path) plus monitoring items, thresholds, and a named owner","A list of every branch and commit created during development","Contact details for all team members and every past meeting minute"],
+a:[0,1],cue:"handoff / decision records / runbook / named owner / rollback",
+e:"<h4>handoffの2本柱</h4><b>A＝「なぜ」の継承。</b>ADRが無いと、後任は<b>過去に検討して却下した案を再発明する</b>か、<b>踏んではいけない地雷を踏みます</b>。「なぜそうしたか」は、コードを読んでも分かりません。<br><b>B＝「どう動かすか」の継承。</b>runbook・監視・<b>named owner</b>——特に責任者の名前が無いシステムは、障害時に誰も動きません。<b>監視は仕組みだけでは動かない</b>のです。<h4>なぜC・Dが誤りか</h4>どちらも<b>情報であって知識ではありません</b>。コミット履歴や議事録は「読めば分かるかもしれない生データ」であり、運用者が必要とするのは<b>整理された判断の根拠と手順</b>です。<b>量ではなく、行動可能性</b>が基準。",
+tm:["adr","runbook","named-owner","lifecycle","production-readiness","observability"]}
+
+);
 window.G=G;window.O=O;window.Q=Q;
